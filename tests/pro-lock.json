@@ -22,7 +22,13 @@
   "Xero sales account code",
   "Xero tax name for GST sales",
   "Xero tax name for GST-free sales",
-  "Export for Xero (CSV)"
+  "Export for Xero (CSV)",
+  "JOB PHOTOS",
+  "Job name or site",
+  "Take photo",
+  "Choose photos",
+  "Remove all photos",
+  "Add the ticked job photos as an extra page on this PDF"
  ],
  "keys": [
   "no",
@@ -36,7 +42,8 @@
   "prev",
   "xacct",
   "xtax",
-  "xfree"
+  "xfree",
+  "job"
  ],
  "ids": [
   "sg-pad",
@@ -47,6 +54,13 @@
   "pdf2",
   "clr",
   "bk",
-  "xe-csv"
+  "xe-csv",
+  "ph-take",
+  "ph-choose",
+  "ph-grid",
+  "ph-clear",
+  "ph-msg",
+  "ph-count",
+  "ph-inc"
  ]
 }
