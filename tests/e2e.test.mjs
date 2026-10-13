@@ -300,6 +300,28 @@ await test('Quote: GST, valid until, deposit, quote fee, preview', async () => {
     assert.ok(p.includes(s), 'quote preview is missing: ' + s);
 });
 
+await test('Quote: an Estimate is labelled as an estimate, a fixed price is not, and start and completion show when typed', async () => {
+  const pg = await open();
+  await tab(pg, 'Quote');
+  await line(pg, 1, 'Labour', '3', '95');
+  assert.equal(await text(pg, 't4l'), 'TOTAL');
+  await pg.click('#pv');
+  let p = await paper(pg);
+  assert.ok(p.includes('TOTAL (incl GST)') && !p.includes('ESTIMATED TOTAL') && !p.includes('This is an estimate') && !p.includes('Estimated start'), 'a fixed price should look as before');
+  await pg.click('#bk');
+  await pg.selectOption('#i-ptype', 'Estimate (final price based on actual hours and materials)');
+  assert.equal(await text(pg, 't4l'), 'ESTIMATED TOTAL');
+  await pg.fill('#i-start', 'TBC on acceptance');
+  await pg.fill('#i-finish', '2 days from start');
+  await pg.click('#pv');
+  p = await paper(pg);
+  for (const s of ['ESTIMATED TOTAL (incl GST)', '$313.50', 'This is an estimate, not a fixed price', 'Price type:', 'Estimated start:', 'TBC on acceptance', 'Estimated completion:', '2 days from start']) assert.ok(p.includes(s), 'estimate quote is missing: ' + s);
+  await pg.click('#bk');
+  await pg.selectOption('#i-ptype', 'Fixed price');
+  assert.equal(await text(pg, 't4l'), 'TOTAL');
+  assert.match(await text(pg, 'c-dn'), /home warranty insurance/);
+});
+
 /* ---------- 7. the signature fix ---------- */
 for (const [label, kind] of [['desktop', DESKTOP], ['phone', PHONE]]) {
   await test(`signature: typed words sit above the line on ${label} (Quote and Variation, editing and preview)`, async () => {

@@ -220,6 +220,18 @@ await test('a customer name that looks like a formula cannot run in a spreadshee
   assert.equal(a['*ContactName'], ' =1+1');
 });
 
+/* ---------- against Xero's own template file ---------- */
+await test("Xero's own Bill template: every column in it is in our file, with the same name, in the same order", () => {
+  const bill = readFileSync('tests/fixtures/xero-bill-template.csv', 'utf8').trim().split(',');
+  const plain = (c) => c.replace(/^\*/, '');
+  const ours = XERO_HEADER.map(plain);
+  const theirs = bill.map(plain);
+  assert.equal(bill.length, 26);
+  assert.deepEqual(ours.filter((c) => theirs.includes(c)), theirs);
+  assert.deepEqual(ours.filter((c) => !theirs.includes(c)), ['Reference', 'Discount', 'BrandingTheme']);
+  for (const c of ['POCity', 'PORegion', 'POPostalCode', 'POCountry']) assert.ok(bill.includes(c), c);
+});
+
 /* ---------- the check before download ---------- */
 const good = { ...base, registered: true, gstRate: 0.1 };
 

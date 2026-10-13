@@ -120,7 +120,9 @@ function documentTab(tab) {
   const title = q ? 'QUOTE' : ti ? 'TAX INVOICE' : 'INVOICE';
   let h = `<div class="pg">${band(title)}<div class="leg" id="leg"></div>${sec(q ? 'QUOTE DETAILS' : 'INVOICE DETAILS')}`;
   h += row(tab, 'no', q ? 'Quote no.' : 'Invoice no.', 't') + row(tab, 'date', q ? 'Date' : 'Issue date', 'd') + row(tab, 'cust', q ? 'Client / customer name' : 'Bill to', 't', { auto: 'name' });
-  h += q ? row(tab, 'valid', 'Valid until', 'c') + row(tab, 'phone', 'Phone / email', 't') : row(tab, 'due', 'Due date', 'c');
+  h += q
+    ? row(tab, 'valid', 'Valid until', 'c') + row(tab, 'phone', 'Phone / email', 't') + row(tab, 'start', 'Estimated start (optional)', 't', { ex: 'For example a date, or TBC on acceptance.' }) + row(tab, 'finish', 'Estimated completion (optional)', 't', { ex: 'For example 2 days from the start.' })
+    : row(tab, 'due', 'Due date', 'c');
   if (ti) h += row(tab, 'cabn', 'Customer ABN', 'abn');
   h += row(tab, 'addr', 'Address', 't') + row(tab, 'site', q ? 'Job site' : 'Job address', 't');
   if (ti) h += '<div class="warn" id="req"></div>';

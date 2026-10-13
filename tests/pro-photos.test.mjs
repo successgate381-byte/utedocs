@@ -279,6 +279,34 @@ await test('security: pictures from this device are allowed, scripts from anywhe
   assert.ok(!/script-src[^;]*blob:/.test(csp));
 });
 
+await test('ticked photos reach every kind of document, the Progress Claim included, and its PDF gets a photo page', async () => {
+  const pg = await open('/pro/');
+  await addPhotos(pg, [file('a.jpg', await jpeg(900, 600)), file('b.jpg', await jpeg(600, 900))]);
+  for (const i of [0, 1]) await cards(pg).nth(i).locator('input[type=checkbox]').check();
+  for (const t of ['Quote', 'Tax Invoice', 'Invoice', 'Variation', 'Progress Claim']) {
+    await tab(pg, t);
+    if (t === 'Progress Claim') {
+      await pg.fill('#i-contract', '10000');
+      await pg.fill('#i-pct', '40');
+    }
+    await pg.check('#ph-inc');
+    await pg.click('#pv');
+    assert.equal(await pg.locator('#paper .photopage.extra img').count(), 2, t + ': the preview should show the 2 ticked photos');
+    assert.ok(await pg.locator('#paper .photopage.extra img').first().evaluate((e) => e.complete && e.naturalWidth > 0), t + ': a picture did not load');
+    await pg.click('#bk');
+    await pg.uncheck('#ph-inc');
+    await pg.click('#pv');
+    assert.equal(await pg.locator('#paper .photopage').count(), 0, t + ': photos should go when the box is unticked');
+    await pg.click('#bk');
+  }
+  await tab(pg, 'Progress Claim');
+  await pg.check('#ph-inc');
+  await pg.emulateMedia({ media: 'print' });
+  const pdf = (await pg.pdf({ format: 'A4', printBackground: true, preferCSSPageSize: true })).toString('latin1');
+  assert.equal((pdf.match(/\/Type\s*\/Page[^s]/g) || []).length, 2, 'the claim PDF should have the photos on a second page');
+  assert.ok(/\/Subtype\s*\/Image/.test(pdf), 'the photos are not in the claim PDF');
+});
+
 await scratch.context().close();
 await browser.close();
 server.close();

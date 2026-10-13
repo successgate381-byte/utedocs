@@ -188,5 +188,7 @@ export const DEFAULTS = {
 };
 
 export const PRICE_TYPES = ['Fixed price', 'Estimate (final price based on actual hours and materials)'];
+/** True when the Price type box says Estimate. */
+export const isEstimate = (v) => String(v ?? '').startsWith('Estimate');
 export const WHY_OPTIONS = ['Customer asked for it', 'Hidden problem found', 'Rule or compliance change', 'Material or supplier change', 'Other'];
 export const MARKUPS = [10, 15, 20, 25, 30, 40, 50];

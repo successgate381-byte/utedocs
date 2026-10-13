@@ -1,5 +1,5 @@
 // The clean finished document. Empty boxes are left out. This is what Preview and Save as PDF show.
-import { FOOT } from './data.js';
+import { FOOT, isEstimate } from './data.js';
 import { firstText, hooks, pipe } from './hooks.js';
 import { addDays, esc, fmtDate, has, money, num, round2, safeUrl } from './format.js';
 import { depositFraction, leftToPay, sumLines, variationNewTotal } from './calc.js';
@@ -32,7 +32,7 @@ export function buildPaper(tab) {
   if (!P) return;
   const whole = firstText(hooks.paperFull, tab);
   if (whole !== null) {
-    P.innerHTML = whole;
+    P.innerHTML = pipe(hooks.paperAfter, whole, tab);
     return;
   }
   const D = (k) => get('D', k);
@@ -62,7 +62,7 @@ export function buildPaper(tab) {
   h += `<div class="hd"><div class="biz">${biz.map((b) => bz(b[0], b[1])).join('')}</div><div class="biz meta">${meta.map((m) => bz(m[0], m[1])).join('')}</div></div>`;
   h += kv(ti ? 'Bill to' : q ? 'Prepared for' : 'Client / customer', (g('cust') || '') + (has(g('cabn')) ? ' (ABN ' + g('cabn') + ')' : ''));
   h += kv('Phone / email', g('phone')) + kv('Address', g('addr')) + kv(q || vr ? 'Job site' : 'Job address', g('site'));
-  if (q) h += kv('Scope of work', g('scope')) + kv('Price type', g('ptype') || 'Fixed price');
+  if (q) h += kv('Scope of work', g('scope')) + kv('Price type', g('ptype') || 'Fixed price') + kv('Estimated start', g('start')) + kv('Estimated completion', g('finish'));
   if (vr) h += kv('Why the change', g('why') === 'Other' && has(g('whyo')) ? g('whyo') : g('why') || 'Customer asked for it') + kv('What is changing', g('desc'));
 
   let rows = '';
@@ -75,9 +75,10 @@ export function buildPaper(tab) {
   if (rows) h += `<table><tr><th>Description</th><th class="n">Qty</th><th class="n">${q || vr ? 'Unit price' : 'Price'}${ex}</th>${showGst ? '<th>GST?</th>' : ''}<th class="n">Amount${ex}</th></tr>${rows}</table>`;
 
   h += tt('Subtotal' + ex, money(v.sub)) + (showGst ? tt(gstLabel(showGst), money(v.gst)) : '');
-  h += tt(vr ? 'THIS VARIATION' + (showGst ? ' (incl GST)' : '') : ti ? 'TOTAL PAYABLE (incl GST)' : q ? 'TOTAL' + (showGst ? ' (incl GST)' : '') : 'TOTAL PAYABLE', money(v.total), 'big');
+  h += tt(vr ? 'THIS VARIATION' + (showGst ? ' (incl GST)' : '') : ti ? 'TOTAL PAYABLE (incl GST)' : q ? (isEstimate(g('ptype')) ? 'ESTIMATED TOTAL' : 'TOTAL') + (showGst ? ' (incl GST)' : '') : 'TOTAL PAYABLE', money(v.total), 'big');
   if (ti) h += `<p class="sm">${v.gstFree ? 'GST amount is shown above. Items marked No are GST-free.' : 'Total price includes GST of ' + money(v.gst)}</p>`;
   if (q) h += `<p class="sm">${reg ? 'All prices exclude GST. GST is added to items marked Yes.' : 'Not registered for GST. No GST charged.'}</p>`;
+  if (q && isEstimate(g('ptype'))) h += '<p class="sm">This is an estimate, not a fixed price. The final price depends on the actual hours and materials.</p>';
   if (inv) h += '<p class="sm">GST not applicable. Supplier is not registered for GST.</p>';
 
   if (q) {

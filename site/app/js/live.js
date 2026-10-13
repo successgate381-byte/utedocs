@@ -4,7 +4,7 @@ import { abnLooksValid, addDays, fmtDate, has, money, num, round2 } from './form
 import { depositFraction, leftToPay, rateCalc, sumLines, variationNewTotal } from './calc.js';
 import { buildPaper, gstLabel, payHtml, quoteTotal } from './paper.js';
 import { get, gstRate, lineCount, linesOf, registered } from './state.js';
-import { DOC_TABS } from './data.js';
+import { DOC_TABS, isEstimate } from './data.js';
 import { hooks, isDocTab, runAll } from './hooks.js';
 
 /** Show the picked date as "6 Oct 2026" in every date box. */
@@ -40,6 +40,7 @@ function documentLive(tab) {
   const v = sumLines(linesOf(tab, n), showGst, gstRate());
   const date = get(tab, 'date');
   totalsRows(v, showGst);
+  if (q) setText('t4l', isEstimate(get(tab, 'ptype')) ? 'ESTIMATED TOTAL' : 'TOTAL');
   showLineAmounts(tab, n);
   showDates(tab);
   setText('c-valid', fmtDate(addDays(date, 30)));
@@ -66,7 +67,7 @@ function documentLive(tab) {
     setText('c-gn', reg ? 'All prices exclude GST. GST is added to items marked Yes.' : 'Not registered for GST. No GST charged.');
     setText('c-dn', has(get(tab, 'dep'))
       ? 'Deposit due: ' + money(round2(v.total * depositFraction(get(tab, 'dep')))) + ". Check your regulator's current deposit limit for building work before you ask for it."
-      : "Deposits on building work are capped in most states, and the cap depends on the contract value. Check your regulator's current limit before you set a percentage.");
+      : "Deposits on building work are capped in most states, and the cap depends on the contract value. Larger jobs may also need a written contract and home warranty insurance; in Queensland the insurance premium is included in the quote. Check your regulator's current rules before you set a percentage.");
     const fee = has(get(tab, 'fee')) ? num(get(tab, 'fee')) : 0;
     setText('c-fn', fee
       ? 'Quote fee ' + money(fee) + ' is kept separate, so it is not added to the total above. ' + (get(tab, 'feec') === 'No' ? 'It is not credited back.' : 'If the customer goes ahead it is taken off: ' + money(leftToPay(v.total, fee)) + ' left to pay.')
