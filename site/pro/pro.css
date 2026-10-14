@@ -48,3 +48,7 @@
 #paper .photopage img { display: block; width: 100%; height: auto; border: 1px solid var(--line); }
 #paper .photopage figcaption { font-size: 11px; color: var(--mut); padding-top: 2px; }
 @media print { #paper .photopage.extra { break-before: page; } }
+
+/* P6: starter packs */
+.pk-flag { margin: 10px 16px; padding: 8px 12px; border-left: 4px solid var(--or); background: #fff4e5; color: #8a5a00; font-weight: 700; font-size: 13px; }
+@media print { .pk-flag { display: none !important; } }

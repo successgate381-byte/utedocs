@@ -232,6 +232,15 @@ await test("Xero's own Bill template: every column in it is in our file, with th
   for (const c of ['POCity', 'PORegion', 'POPostalCode', 'POCountry']) assert.ok(bill.includes(c), c);
 });
 
+await test("Xero's own Sales Invoice template: our header is identical, and our files start with it", () => {
+  const header = readFileSync('tests/fixtures/xero-sales-invoice-template.csv', 'utf8').split(/\r?\n/)[0];
+  assert.equal(header.split(',').length, 29);
+  assert.equal(XERO_COLUMNS.join(','), header);
+  const csv = buildXeroCsv(base).csv;
+  assert.equal(csv.split('\r\n')[0], header);
+  assert.ok(csv.endsWith('\r\n'));
+});
+
 /* ---------- the check before download ---------- */
 const good = { ...base, registered: true, gstRate: 0.1 };
 

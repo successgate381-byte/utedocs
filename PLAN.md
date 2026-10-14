@@ -23,7 +23,7 @@ Tick a line only when it is built, tested and you said "clean".
 - [x] P2 Client signature pad (Quote and Variation): finger or Apple Pencil, Clear and Undo, small image shown above the line on Preview and PDF, accepted date added. Done when: drawing test passes, page does not scroll while drawing.
 - [x] P3 Progress claim tab (decision 2). Done when: maths tests pass.
 - [x] P4 Xero invoice CSV export (decision 5). Done when: columns match Xero's template.
-- [ ] P5 Job photos (decision 3): take or pick, resize, store on the device, optional PDF page. Done when: resize and storage tests pass.
+- [x] P5 Job photos (decision 3): take or pick, resize, store on the device, optional PDF page. Done when: resize and storage tests pass.
 - [ ] P6 Starter packs, Electrician and Plumber (decision 4). Done when: packs load and can be edited.
 - [ ] P7 Licence gate: server checks the Gumroad key, signed cookie, "Remember this device" ticked by default, Forget button. Done when: good key opens Pro and wrong key does not (pretend Gumroad here, real one later).
 - [ ] P8 Remote accept link (optional): send link, client signs, you check status, 60-day expiry. Done when: tested with a pretend store.

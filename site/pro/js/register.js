@@ -5,6 +5,7 @@ import { mountPad, signaturePaper } from './signature.js';
 import { CLAIM_TAB, claimLive, claimPaper, claimScreen } from './claim.js';
 import { mountXero, updateXeroCheck } from './xero.js';
 import { PHOTOS_TAB, addPhotoPage, initPhotos, mountPhotos, photosPaper, photosScreen } from './photos.js';
+import { bracketFlag, mountPacks, updatePackWarn } from './packs.js';
 
 hooks.afterRender.push((tab) => {
   if (tab !== 'Start Here') return;
@@ -37,3 +38,8 @@ hooks.paperFull.push((tab) => (tab === PHOTOS_TAB ? photosPaper() : null));
 hooks.paperAfter.push((html, tab) => addPhotoPage(html, tab));
 hooks.afterRender.push((tab) => mountPhotos(tab));
 initPhotos();
+
+// P6: starter packs on the Quote tab, and a screen-only flag for leftover [brackets].
+hooks.afterRender.push((tab) => mountPacks(tab));
+hooks.refresh.push((tab) => updatePackWarn(tab));
+hooks.paperAfter.push((html, tab) => bracketFlag(html, tab));

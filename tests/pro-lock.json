@@ -28,7 +28,10 @@
   "Take photo",
   "Choose photos",
   "Remove all photos",
-  "Add the ticked job photos as an extra page on this PDF"
+  "Add the ticked job photos as an extra page on this PDF",
+  "STARTER PACK (PRO)",
+  "Job type",
+  "Fill empty boxes"
  ],
  "keys": [
   "no",
@@ -61,6 +64,10 @@
   "ph-clear",
   "ph-msg",
   "ph-count",
-  "ph-inc"
+  "ph-inc",
+  "pk-pick",
+  "pk-fill",
+  "pk-msg",
+  "pk-warn"
  ]
 }
