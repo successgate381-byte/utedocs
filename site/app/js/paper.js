@@ -1,5 +1,5 @@
 // The clean finished document. Empty boxes are left out. This is what Preview and Save as PDF show.
-import { FOOT, isEstimate } from './data.js';
+import { isEstimate } from './data.js';
 import { firstText, hooks, pipe } from './hooks.js';
 import { addDays, esc, fmtDate, has, money, num, round2, safeUrl } from './format.js';
 import { depositFraction, leftToPay, sumLines, variationNewTotal } from './calc.js';
@@ -9,6 +9,27 @@ const TITLES = { Quote: 'QUOTE', 'Tax Invoice': 'TAX INVOICE', Invoice: 'INVOICE
 
 /** The GST row label, for example "GST (10%)". */
 export const gstLabel = (on) => (on ? 'GST (' + Math.round(gstRate() * 100) + '%)' : 'GST (not registered, none charged)');
+
+/**
+ * The top of a finished document: the title on its own line, then the business name with its
+ * ABN, licence, phone and email together in one block, then the number and dates in a strip.
+ * @param {string} title
+ * @param {string[][]} meta  label and value pairs. Empty values are left out.
+ */
+export function letterhead(title, meta) {
+  const D = (k) => get('D', k);
+  const bit = (label, x) => (has(x) ? `<span><i>${label}</i> <b>${esc(x)}</b></span>` : '');
+  const ids = bit('ABN', D('abn')) + bit('Licence', D('lic'));
+  const contact = bit('Phone', D('phone')) + bit('Email', D('email'));
+  const cells = meta.filter((m) => has(m[1])).map((m) => `<div class="mc"><span>${esc(m[0])}</span><b>${esc(m[1])}</b></div>`).join('');
+  return `<div class="ttl">${title}</div><div class="lh"><b class="lhn">${esc(D('name') || 'Your Business Name')}</b>${ids ? `<div class="lhl">${ids}</div>` : ''}${contact ? `<div class="lhl">${contact}</div>` : ''}</div>${cells ? `<div class="mt">${cells}</div>` : ''}`;
+}
+
+/** The line under a finished document. Lite shows a small "Made with UteDocs" mark. Pro shows nothing. */
+export function paperFoot() {
+  if (hooks.edition === 'pro') return '';
+  return '<div class="made"><svg viewBox="0 0 96 96" width="16" height="16" aria-hidden="true"><rect width="96" height="96" rx="22" fill="#1F2A44"/><path d="M27 17h29l15 15v44a5 5 0 0 1-5 5H27a5 5 0 0 1-5-5V22a5 5 0 0 1 5-5z" fill="#fff"/><path d="M56 17l15 15H61a5 5 0 0 1-5-5z" fill="#F28C28"/><path d="M32 40h22M32 50h14" stroke="#C5CCDA" stroke-width="4.5" stroke-linecap="round" fill="none"/><path d="M35 66l8 8 18-19" stroke="#F28C28" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><span>Made with UteDocs</span></div>';
+}
 
 /** Bank details and card link. Used on screen and on the finished document. */
 export function payHtml(reference) {
@@ -47,10 +68,8 @@ export function buildPaper(tab) {
   const v = sumLines(linesOf(tab, n), showGst, gstRate());
   const date = g('date');
   const kv = (label, x) => (has(x) ? `<p><b>${label}:</b> ${esc(x).replace(/\n/g, '<br>')}</p>` : '');
-  const bz = (label, x) => `<div class="bz"><span>${label}</span><b>${esc(x)}</b></div>`;
   const tt = (label, x, cls = '') => `<div class="tr ${cls}"><span>${label}</span><span>${x}</span></div>`;
 
-  const biz = [['ABN', D('abn')], ['Licence', D('lic')], ['Phone', D('phone')], ['Email', D('email')]].filter((x) => has(x[1]));
   const meta = [
     [(vr ? 'Variation' : q ? 'Quote' : 'Invoice') + ' no.', g('no')],
     ['Date', fmtDate(date)],
@@ -58,8 +77,7 @@ export function buildPaper(tab) {
     vr ? ['Extra days', g('days')] : ['', ''],
   ].filter((m) => has(m[1]));
 
-  let h = `<div class="band"><b>${esc(D('name') || 'Your Business Name')}</b><i>${TITLES[tab]}</i></div>`;
-  h += `<div class="hd"><div class="biz">${biz.map((b) => bz(b[0], b[1])).join('')}</div><div class="biz meta">${meta.map((m) => bz(m[0], m[1])).join('')}</div></div>`;
+  let h = letterhead(TITLES[tab], meta);
   h += kv(ti ? 'Bill to' : q ? 'Prepared for' : 'Client / customer', (g('cust') || '') + (has(g('cabn')) ? ' (ABN ' + g('cabn') + ')' : ''));
   h += kv('Phone / email', g('phone')) + kv('Address', g('addr')) + kv(q || vr ? 'Job site' : 'Job address', g('site'));
   if (q) h += kv('Scope of work', g('scope')) + kv('Price type', g('ptype') || 'Fixed price') + kv('Estimated start', g('start')) + kv('Estimated completion', g('finish'));
@@ -104,5 +122,5 @@ export function buildPaper(tab) {
     h += `<p class="accept"><b>${vr ? 'I approve this variation, the extra cost and any extra days shown above. The extra work starts after I approve.' : 'I accept this quote.'}</b></p>`;
     h += `<div class="sg"><div class="c"><em>${f('an')}</em><span>Client / customer name</span></div><div class="c"><em>${f('as')}</em><span>Client / customer signature</span></div><div class="c"><em>${f('ad')}</em><span>Date</span></div></div>`;
   }
-  P.innerHTML = pipe(hooks.paperAfter, h + `<p class="sm foot">${FOOT}</p>`, tab);
+  P.innerHTML = pipe(hooks.paperAfter, h + paperFoot(), tab);
 }

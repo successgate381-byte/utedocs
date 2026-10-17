@@ -4,8 +4,10 @@ import { DOC_TABS, TABS } from './data.js';
 
 /** @typedef {(...args: any[]) => any} Hook */
 
-/** @type {{ tabs: string[], docTabs: string[], render: Hook[], afterRender: Hook[], refresh: Hook[], paperFull: Hook[], paperAfter: Hook[], click: Hook[], tabAfter: Record<string, string[]> }} */
+/** @type {{ edition: string, tabs: string[], docTabs: string[], render: Hook[], afterRender: Hook[], refresh: Hook[], paperFull: Hook[], paperAfter: Hook[], click: Hook[], tabAfter: Record<string, string[]> }} */
 export const hooks = {
+  /** Which edition is running: "lite" or "pro". Pro sets this in register.js. */
+  edition: 'lite',
   /** Extra tab names, added after the Lite tabs. */
   tabs: [],
   /** Extra tabs that make a finished document (Preview and Save as PDF). */

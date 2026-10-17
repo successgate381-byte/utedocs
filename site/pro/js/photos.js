@@ -1,7 +1,7 @@
 // P5: the Photos tab. Take or choose photos, shrink them, keep them on this device,
 // and tick the ones to print. Ticked photos can also be added as an extra page on any document.
 import { $, setText } from '../../app/js/dom.js';
-import { FOOT } from '../../app/js/data.js';
+import { letterhead, paperFoot } from '../../app/js/paper.js';
 import { esc, has } from '../../app/js/format.js';
 import { refresh } from '../../app/js/live.js';
 import { get, put, view } from '../../app/js/state.js';
@@ -152,14 +152,10 @@ ${foot()}</div>`;
 
 /** The finished Photos document. */
 export function photosPaper() {
-  const D = (k) => get('D', k);
   const job = get(PHOTOS_TAB, 'job');
-  const biz = [['ABN', D('abn')], ['Licence', D('lic')], ['Phone', D('phone')], ['Email', D('email')]].filter((x) => has(x[1]));
-  const bz = (label, x) => `<div class="bz"><span>${label}</span><b>${esc(x)}</b></div>`;
-  let h = `<div class="band"><b>${esc(D('name') || 'Your Business Name')}</b><i>JOB PHOTOS</i></div>`;
-  h += `<div class="hd"><div class="biz">${biz.map((b) => bz(b[0], b[1])).join('')}</div><div class="biz meta">${has(job) ? bz('Job', job) : ''}</div></div>`;
+  let h = letterhead('JOB PHOTOS', [['Job', job]]);
   h += photoPage(false) || '<p class="sm">No photos are ticked. Tick photos on the Photos tab to print them here.</p>';
-  return h + `<p class="sm foot">${FOOT}</p>`;
+  return h + paperFoot();
 }
 
 /** Add the photo page to another document, when that document has the box ticked. */

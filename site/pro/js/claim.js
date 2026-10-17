@@ -1,8 +1,7 @@
 // P3: the Progress Claim tab. It sits straight after Variation and has its own finished document.
 import { $, setText } from '../../app/js/dom.js';
-import { FOOT } from '../../app/js/data.js';
 import { addDays, esc, fmtDate, has, money, num } from '../../app/js/format.js';
-import { gstLabel, payHtml, quoteTotal } from '../../app/js/paper.js';
+import { gstLabel, letterhead, paperFoot, payHtml, quoteTotal } from '../../app/js/paper.js';
 import { get, gstRate, registered } from '../../app/js/state.js';
 import { band, buttons, foot, note, payBlock, row, sec, total } from '../../app/js/views.js';
 import { claimMaths } from './claim-math.js';
@@ -83,17 +82,14 @@ export function claimPaper() {
   const reg = registered();
   const m = sums();
   const kv = (label, x) => (has(x) ? `<p><b>${label}:</b> ${esc(x).replace(/\n/g, '<br>')}</p>` : '');
-  const bz = (label, x) => `<div class="bz"><span>${label}</span><b>${esc(x)}</b></div>`;
   const tt = (label, x, cls = '') => `<div class="tr ${cls}"><span>${label}</span><span>${x}</span></div>`;
-  const biz = [['ABN', D('abn')], ['Licence', D('lic')], ['Phone', D('phone')], ['Email', D('email')]].filter((x) => has(x[1]));
   const meta = [
     ['Claim no.', g('no')],
     ['Date', fmtDate(g('date'))],
     ['Due date', fmtDate(addDays(g('date'), num(D('terms'))))],
     ['Quote / job no.', g('qno')],
   ].filter((x) => has(x[1]));
-  let h = `<div class="band"><b>${esc(D('name') || 'Your Business Name')}</b><i>PROGRESS CLAIM</i></div>`;
-  h += `<div class="hd"><div class="biz">${biz.map((b) => bz(b[0], b[1])).join('')}</div><div class="biz meta">${meta.map((x) => bz(x[0], x[1])).join('')}</div></div>`;
+  let h = letterhead('PROGRESS CLAIM', meta);
   h += kv('Client / customer', g('cust')) + kv('Job site', g('site')) + kv('This claim covers', g('desc'));
   h += tt('Contract total', money(m.contract)) + tt('Work complete to date', m.percent + '%') + tt('Work done to date', money(m.toDate)) + tt('Less earlier claims', money(m.earlier));
   if (reg) h += tt('Subtotal (ex GST)', money(m.exGst)) + tt(gstLabel(true), money(m.gst));
@@ -101,5 +97,5 @@ export function claimPaper() {
   h += tt('Balance remaining on the contract', money(m.remaining));
   if (has(D('bank')) || has(D('acno'))) h += `<div class="sec">PAYMENT DETAILS</div><div class="pd">${payHtml(g('no'))}</div>`;
   h += `<p>Payment due within ${esc(D('terms'))} days of the claim date.</p>`;
-  return h + `<p class="sm foot">${FOOT}</p>`;
+  return h + paperFoot();
 }

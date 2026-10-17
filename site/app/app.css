@@ -76,17 +76,29 @@ textarea { resize: none; overflow: hidden; }
 .tr small { color: var(--mut); }
 .big { background: var(--navy); color: #fff; font-size: 15px; margin-top: 6px; padding: 11px 10px; border-radius: 6px; }
 
+/* ---------- finished document: title, letterhead, number-and-dates strip, footer ---------- */
+#paper .ttl { padding: 16px 16px 10px; color: var(--navy); font: 800 28px/1.1 var(--font); letter-spacing: .06em; border-bottom: 4px solid var(--or); }
+#paper .lh { background: var(--navy); color: #fff; padding: 12px 16px 13px; }
+#paper .lhn { display: block; font-size: 20px; overflow-wrap: anywhere; }
+#paper .lhl { display: flex; flex-wrap: wrap; gap: 2px 18px; margin-top: 4px; font-size: 13px; color: #e3e8f3; }
+#paper .lhl i { font-style: normal; color: #aeb9d1; }
+#paper .lhl b { color: #fff; overflow-wrap: anywhere; }
+#paper .mt { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 6px 14px; padding: 9px 16px; border-bottom: 1px solid var(--line); }
+#paper .mc span { display: block; font-size: 11px; color: var(--mut); }
+#paper .mc b { font-size: 14px; overflow-wrap: anywhere; }
+#paper .made { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 16px 16px 0; padding-top: 8px; border-top: 1px solid var(--line); font-size: 11px; color: var(--mut); }
+
 /* ---------- business details and payment panel ---------- */
 .biz { color: var(--ink); border-top: 4px solid var(--or); padding: 10px 16px 6px; font-size: 14px; }
 .bz { display: grid; grid-template-columns: 82px 1fr; gap: 8px; padding: 2px 0; }
 .bz span { color: var(--mut); font-size: 12px; padding-top: 2px; }
 .bz b { overflow-wrap: anywhere; }
-.pd { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; margin: 8px 16px; padding: 14px 16px; border: 1px solid var(--line); border-left: 4px solid var(--or); border-radius: 6px; background: #fafbfd; }
+.pd { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 20px; margin: 6px 16px; padding: 10px 14px; border: 1px solid var(--line); border-left: 4px solid var(--or); border-radius: 6px; background: #fafbfd; }
 .pd:empty { display: none; }
 .pr { display: flex; flex-direction: column; }
 .pr span { font-size: 11px; color: var(--mut); }
-.pr b { font-size: 15px; overflow-wrap: anywhere; }
-.pc { grid-column: 1 / -1; font-size: 15px; padding-top: 4px; }
+.pr b { font-size: 14px; overflow-wrap: anywhere; }
+.pc { grid-column: 1 / -1; font-size: 14px; padding-top: 2px; }
 .pc b { color: var(--navy); }
 .pc a { color: var(--or-dark); font-weight: 700; word-break: break-all; }
 
@@ -146,7 +158,8 @@ body.pv .pbar { display: flex; }
   .ln select { grid-column: 4; grid-row: 2; padding-left: 4px; padding-right: 2px; }
   .ln .am { grid-column: 2 / -1; grid-row: 3; }
   .ln .am::before { content: "Amount"; float: left; font-weight: 400; color: var(--mut); }
-  .pd { grid-template-columns: 1fr; }
+  .pd { gap: 8px 14px; padding: 10px 12px; }
+  #paper .ttl { font-size: 24px; }
   .sg { grid-template-columns: 1fr; }
   #paper .hd { grid-template-columns: 1fr; }
   #paper .hd .meta { border-left: 0; border-top: 1px solid var(--line); }
@@ -164,7 +177,7 @@ body.pv .pbar { display: flex; }
   body.hasp .pg { display: none !important; }
   body.hasp #paper { display: block; }
   input, select, textarea { border: 0; background: none; padding: 2px; appearance: none; -webkit-appearance: none; }
-  .band, .sub, .big, #paper th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .band, .sub, .big, #paper .lh, #paper th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   #paper tr, #paper .sg, #paper .pd { break-inside: avoid; }
   #paper { font-size: 12px; line-height: 1.35; padding-bottom: 0; }
   #paper .band { padding: 11px 16px; }
@@ -175,7 +188,11 @@ body.pv .pbar { display: flex; }
   #paper .tr { padding: 3px 10px; }
   #paper .big { padding: 8px 10px; margin-top: 4px; }
   #paper .sec { margin-top: 10px; }
-  #paper .pd { margin: 6px 16px; padding: 10px 14px; gap: 8px 20px; }
+  #paper .pd { margin: 6px 16px; padding: 8px 12px; gap: 6px 18px; }
+  #paper .ttl { padding: 8px 16px 6px; }
+  #paper .lh { padding: 9px 16px 10px; }
+  #paper .mt { padding: 6px 16px; }
+  #paper .made { margin-top: 10px; }
   #paper .accept { margin-top: 12px; }
   #paper .sg { margin-top: 22px; }
   #paper .foot { margin-top: 10px; }

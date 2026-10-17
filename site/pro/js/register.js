@@ -7,6 +7,8 @@ import { mountXero, updateXeroCheck } from './xero.js';
 import { PHOTOS_TAB, addPhotoPage, initPhotos, mountPhotos, photosPaper, photosScreen } from './photos.js';
 import { bracketFlag, mountPacks, updatePackWarn } from './packs.js';
 
+hooks.edition = 'pro';
+
 hooks.afterRender.push((tab) => {
   if (tab !== 'Start Here') return;
   const title = $('.band b');
