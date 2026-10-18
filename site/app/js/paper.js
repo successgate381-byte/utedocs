@@ -51,6 +51,7 @@ export function quoteTotal() {
 export function buildPaper(tab) {
   const P = document.getElementById('paper');
   if (!P) return;
+  P.dataset.doc = tab;
   const whole = firstText(hooks.paperFull, tab);
   if (whole !== null) {
     P.innerHTML = pipe(hooks.paperAfter, whole, tab);

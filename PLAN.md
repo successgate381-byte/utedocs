@@ -27,6 +27,7 @@ Tick a line only when it is built, tested and you said "clean".
 6. Starter packs: choosing another job type swaps boxes that still hold the old pack's words. Words you typed or changed stay.
 7. Photos: large framed photos, 2 per PDF page (or 1), numbered, with a caption and the date added. Tap a photo to open it full screen.
 8. Parked until after launch: QR code for the card link, the "10 things every tradie quote needs" checklist, Pinterest pins.
+9. Printing: only the Quote prints at 85%, so a typical quote fits one sheet on Letter or A4. Other documents print at full size. Longer documents flow onto more pages with the keep-together rules. Automatic fit is a later option, only after a check on a real phone.
 
 ## Pro build ($47)
 - [x] P1 Pro shell: /pro/ page runs the same app plus a Pro badge; extension points in Lite (hooks). Done when: every Lite test passes inside Pro.
