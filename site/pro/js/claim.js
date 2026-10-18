@@ -91,10 +91,10 @@ export function claimPaper() {
   ].filter((x) => has(x[1]));
   let h = letterhead('PROGRESS CLAIM', meta);
   h += kv('Client / customer', g('cust')) + kv('Job site', g('site')) + kv('This claim covers', g('desc'));
-  h += tt('Contract total', money(m.contract)) + tt('Work complete to date', m.percent + '%') + tt('Work done to date', money(m.toDate)) + tt('Less earlier claims', money(m.earlier));
+  h += '<div class="tot">' + tt('Contract total', money(m.contract)) + tt('Work complete to date', m.percent + '%') + tt('Work done to date', money(m.toDate)) + tt('Less earlier claims', money(m.earlier));
   if (reg) h += tt('Subtotal (ex GST)', money(m.exGst)) + tt(gstLabel(true), money(m.gst));
   h += tt(reg ? 'THIS CLAIM (incl GST)' : 'THIS CLAIM', money(m.thisClaim), 'big');
-  h += tt('Balance remaining on the contract', money(m.remaining));
+  h += tt('Balance remaining on the contract', money(m.remaining)) + '</div>';
   if (has(D('bank')) || has(D('acno'))) h += `<div class="sec">PAYMENT DETAILS</div><div class="pd">${payHtml(g('no'))}</div>`;
   h += `<p>Payment due within ${esc(D('terms'))} days of the claim date.</p>`;
   return h + paperFoot();

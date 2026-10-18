@@ -90,14 +90,16 @@ export function buildPaper(tab) {
     rows += `<tr><td>${esc(g('d' + i))}</td><td class="n">${esc(g('q' + i))}</td><td class="n">${used ? money(num(g('p' + i))) : ''}</td>${showGst ? `<td>${g('g' + i) === 'No' ? 'No' : 'Yes'}</td>` : ''}<td class="n">${used ? money(round2(num(g('q' + i)) * num(g('p' + i)))) : ''}</td></tr>`;
   }
   const ex = showGst ? ' (ex GST)' : '';
-  if (rows) h += `<table><tr><th>Description</th><th class="n">Qty</th><th class="n">${q || vr ? 'Unit price' : 'Price'}${ex}</th>${showGst ? '<th>GST?</th>' : ''}<th class="n">Amount${ex}</th></tr>${rows}</table>`;
+  if (rows) h += `<table><thead><tr><th>Description</th><th class="n">Qty</th><th class="n">${q || vr ? 'Unit price' : 'Price'}${ex}</th>${showGst ? '<th>GST?</th>' : ''}<th class="n">Amount${ex}</th></tr></thead><tbody>${rows}</tbody></table>`;
 
+  h += '<div class="tot">';
   h += tt('Subtotal' + ex, money(v.sub)) + (showGst ? tt(gstLabel(showGst), money(v.gst)) : '');
   h += tt(vr ? 'THIS VARIATION' + (showGst ? ' (incl GST)' : '') : ti ? 'TOTAL PAYABLE (incl GST)' : q ? (isEstimate(g('ptype')) ? 'ESTIMATED TOTAL' : 'TOTAL') + (showGst ? ' (incl GST)' : '') : 'TOTAL PAYABLE', money(v.total), 'big');
   if (ti) h += `<p class="sm">${v.gstFree ? 'GST amount is shown above. Items marked No are GST-free.' : 'Total price includes GST of ' + money(v.gst)}</p>`;
   if (q) h += `<p class="sm">${reg ? 'All prices exclude GST. GST is added to items marked Yes.' : 'Not registered for GST. No GST charged.'}</p>`;
   if (q && isEstimate(g('ptype'))) h += '<p class="sm">This is an estimate, not a fixed price. The final price depends on the actual hours and materials.</p>';
   if (inv) h += '<p class="sm">GST not applicable. Supplier is not registered for GST.</p>';
+  h += '</div>';
 
   if (q) {
     const fee = num(g('fee'));
@@ -111,14 +113,16 @@ export function buildPaper(tab) {
   }
   if (vr) {
     const orig = has(g('orig')) ? num(g('orig')) : quoteTotal();
-    h += tt('Original quote total', money(orig)) + tt('Earlier approved variations', money(num(g('prev')))) + tt('This variation', money(v.total));
-    h += tt('NEW TOTAL', money(variationNewTotal(orig, num(g('prev')), v.total)), 'big') + kv('How it gets paid', g('pay'));
+    h += '<div class="tot">' + tt('Original quote total', money(orig)) + tt('Earlier approved variations', money(num(g('prev')))) + tt('This variation', money(v.total));
+    h += tt('NEW TOTAL', money(variationNewTotal(orig, num(g('prev')), v.total)), 'big') + kv('How it gets paid', g('pay')) + '</div>';
   }
   if (!vr && (has(D('bank')) || has(D('acno')))) h += `<div class="sec">PAYMENT DETAILS</div><div class="pd">${payHtml(g('no'))}</div>`;
   if (ti || inv) h += `<p>Payment due within ${esc(D('terms'))} days of the invoice date.</p>`;
-  if (q) h += '<p class="sm">Variations: any change to the scope of work will be quoted and agreed in writing before the work starts.</p>';
+  if (q) h += '<p class="sm keep">Variations: any change to the scope of work will be quoted and agreed in writing before the work starts.</p>';
   if (q || vr) {
     const f = (k) => (has(g(k)) ? (k === 'ad' ? fmtDate(g(k)) : esc(g(k))) : '&nbsp;');
+    const ref = (vr ? 'Variation' : 'Quote') + (has(g('no')) ? ' ' + g('no') : '') + (has(g('cust')) ? ' for ' + g('cust') : '') + ': ' + (vr ? 'this variation ' : 'total ') + money(v.total) + (showGst ? ' (incl GST)' : '');
+    h += `<p class="aref">${esc(ref)}</p>`;
     h += `<p class="accept"><b>${vr ? 'I approve this variation, the extra cost and any extra days shown above. The extra work starts after I approve.' : 'I accept this quote.'}</b></p>`;
     h += `<div class="sg"><div class="c"><em>${f('an')}</em><span>Client / customer name</span></div><div class="c"><em>${f('as')}</em><span>Client / customer signature</span></div><div class="c"><em>${f('ad')}</em><span>Date</span></div></div>`;
   }

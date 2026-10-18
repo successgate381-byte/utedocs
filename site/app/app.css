@@ -86,6 +86,7 @@ textarea { resize: none; overflow: hidden; }
 #paper .mt { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 6px 14px; padding: 9px 16px; border-bottom: 1px solid var(--line); }
 #paper .mc span { display: block; font-size: 11px; color: var(--mut); }
 #paper .mc b { font-size: 14px; overflow-wrap: anywhere; }
+#paper .aref { margin-top: 14px; font-weight: 700; }
 #paper .made { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 16px 16px 0; padding-top: 8px; border-top: 1px solid var(--line); font-size: 11px; color: var(--mut); }
 
 /* ---------- business details and payment panel ---------- */
@@ -179,6 +180,10 @@ body.pv .pbar { display: flex; }
   input, select, textarea { border: 0; background: none; padding: 2px; appearance: none; -webkit-appearance: none; }
   .band, .sub, .big, #paper .lh, #paper th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   #paper tr, #paper .sg, #paper .pd { break-inside: avoid; }
+  #paper .sec, #paper .pd, #paper .keep, #paper .aref, #paper .accept { break-after: avoid; }
+  #paper .tot { break-inside: avoid; }
+  #paper .made { break-before: avoid; }
+  #paper thead { display: table-header-group; }
   #paper { font-size: 12px; line-height: 1.35; padding-bottom: 0; }
   #paper .band { padding: 11px 16px; }
   #paper .biz { padding-top: 8px; padding-bottom: 4px; font-size: 12px; }
