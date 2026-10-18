@@ -156,34 +156,71 @@ export const packsFor = (trade) => PACKS[trade] || [];
 export const hasPlaceholder = (text) => /\[[^\]\n]+\]/.test(String(text ?? ''));
 
 /**
- * What filling a pack would do. It only fills boxes that are empty, so nothing the person typed is lost.
+ * What using a pack would do. Empty boxes are filled. A box that still holds the words an earlier pack put
+ * there, untouched, is swapped for this pack's words. Anything the person typed or changed is kept.
+ * Lines work the same way: untouched, unpriced lines from the old pack are replaced, lines with a quantity
+ * or price, and lines typed by the person, stay.
  * @param {Pack} pack
  * @param {Record<string, any>} cur  scope, incl, excl, rows, and d1.. q1.. p1.. for each row
+ * @param {Record<string, any> | null} [prev]  what the last pack put in: scope, incl, excl and lines
  */
-export function fillPlan(pack, cur) {
+export function fillPlan(pack, cur, prev = null) {
+  const norm = (/** @type {any} */ x) => String(x ?? '').replace(/\r\n/g, '\n').trim();
   /** @type {Record<string, string>} */
   const set = {};
+  /** @type {Record<string, any>} */
+  const rec = { scope: '', incl: '', excl: '', lines: [] };
   const filled = [];
+  const swapped = [];
   const kept = [];
   for (const [key, label, text] of [['scope', 'scope of work', pack.scope], ['incl', 'inclusions', pack.inclusions], ['excl', 'exclusions', pack.exclusions]]) {
-    if (has(cur[key])) kept.push(label);
-    else {
+    const now = norm(cur[key]);
+    const old = prev ? norm(prev[key]) : '';
+    if (!now) {
       set[key] = text;
       filled.push(label);
+      rec[key] = text;
+    } else if (old && now === old && now !== norm(text)) {
+      set[key] = text;
+      swapped.push(label);
+      rec[key] = text;
+    } else {
+      kept.push(label);
+      if (old && now === old) rec[key] = text;
     }
   }
+  const newLines = new Set(pack.lines.map(norm));
+  const oldLines = new Set(prev && Array.isArray(prev.lines) ? prev.lines.map(norm) : []);
   const free = [];
+  const stale = [];
   const have = new Set();
   for (let i = 1; i <= (cur.rows || 0); i++) {
-    if (has(cur['d' + i])) have.add(String(cur['d' + i]).trim());
-    if (!has(cur['d' + i]) && !has(cur['q' + i]) && !has(cur['p' + i])) free.push(i);
+    const d = norm(cur['d' + i]);
+    const bare = !has(cur['q' + i]) && !has(cur['p' + i]);
+    if (!d && bare) free.push(i);
+    else if (d && bare && oldLines.has(d) && !newLines.has(d)) stale.push(i);
+    else if (d) {
+      have.add(d);
+      if (bare && oldLines.has(d)) rec.lines.push(d);
+    }
   }
+  const slots = [...free, ...stale].sort((a, b) => a - b);
   let linesAdded = 0;
   let linesSkipped = 0;
   for (const line of pack.lines) {
     if (have.has(line)) continue;
-    if (linesAdded >= free.length) linesSkipped++;
-    else set['d' + free[linesAdded++]] = line;
+    if (linesAdded >= slots.length) linesSkipped++;
+    else {
+      set['d' + slots[linesAdded++]] = line;
+      rec.lines.push(line);
+    }
   }
-  return { set, filled, kept, linesAdded, linesSkipped };
+  let linesRemoved = 0;
+  for (const i of stale) {
+    if (set['d' + i] === undefined) {
+      set['d' + i] = '';
+      linesRemoved++;
+    }
+  }
+  return { set, filled, swapped, kept, linesAdded, linesSkipped, linesRemoved, rec };
 }

@@ -7,6 +7,15 @@ export const MAX_PHOTOS = 30;
 /** JPEG quality for saved photos (0 to 1). */
 export const QUALITY = 0.8;
 
+/** The date and time a photo was added, in the phone's own time: "6 Oct 2026, 2:45 pm". */
+export function stampText(ms) {
+  const d = new Date(ms);
+  if (!Number.isFinite(d.getTime())) return '';
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const h = d.getHours();
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear() + ', ' + (h % 12 || 12) + ':' + String(d.getMinutes()).padStart(2, '0') + ' ' + (h < 12 ? 'am' : 'pm');
+}
+
 /** The new size for a photo: the same shape, longest side no more than max, never bigger than the original. */
 export function fitSize(w, h, max = MAX_SIDE) {
   if (!(w > 0 && h > 0)) return { w: 1, h: 1 };

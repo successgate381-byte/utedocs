@@ -6,7 +6,7 @@ import { esc, has } from '../../app/js/format.js';
 import { refresh } from '../../app/js/live.js';
 import { get, put, view } from '../../app/js/state.js';
 import { band, foot, note, row, sec } from '../../app/js/views.js';
-import { MAX_PHOTOS, QUALITY, fitSize } from './photo-math.js';
+import { MAX_PHOTOS, QUALITY, fitSize, stampText } from './photo-math.js';
 import { clearPhotos, deletePhoto, listPhotos, savePhoto } from './photos-db.js';
 
 export const PHOTOS_TAB = 'Photos';
@@ -23,6 +23,7 @@ const keep = (/** @type {Photo} */ p) => savePhoto({ id: p.id, caption: p.captio
 
 /** Load the saved photos when the app starts. */
 export async function initPhotos() {
+  wireLightbox();
   try {
     const rows = await listPhotos();
     rows.sort((a, b) => a.added - b.added);
@@ -116,8 +117,8 @@ function renderGrid() {
   grid.innerHTML = photos
     .map(
       (p, n) =>
-        `<div class="ph-card"><img src="${p.url}" alt="Job photo ${n + 1}" width="${p.w}" height="${p.h}">` +
-        `<input type="text" maxlength="80" data-ph="${esc(p.id)}" aria-label="Caption for photo ${n + 1}" placeholder="Caption (optional)" value="${esc(p.caption)}">` +
+        `<div class="ph-card"><button class="ph-open" type="button" data-open="${esc(p.id)}" aria-label="Open photo ${n + 1} full screen"><img src="${p.url}" alt="Job photo ${n + 1}" width="${p.w}" height="${p.h}"></button>` +
+        `<input type="text" maxlength="80" list="ph-caps" data-ph="${esc(p.id)}" aria-label="Caption for photo ${n + 1}" placeholder="Caption (optional)" value="${esc(p.caption)}">` +
         `<label class="ph-tick"><input type="checkbox" data-print="${esc(p.id)}"${p.print ? ' checked' : ''}> Print</label>` +
         `<button class="b g" data-remove="${esc(p.id)}">Remove</button></div>`,
     )
@@ -126,13 +127,71 @@ function renderGrid() {
   setText('ph-count', photos.length ? photos.length + (photos.length === 1 ? ' photo' : ' photos') + ' kept on this device, ' + ticked + ' ticked to print.' : 'No photos yet.');
 }
 
+/** @type {HTMLElement | null} */
+let lightbox = null;
+/** @type {Element | null} */
+let lightboxFrom = null;
+
+function closeLightbox() {
+  if (!lightbox) return;
+  lightbox.remove();
+  lightbox = null;
+  document.body.classList.remove('lb-open');
+  if (lightboxFrom instanceof HTMLElement) lightboxFrom.focus();
+  lightboxFrom = null;
+}
+
+/** One photo, full screen. Pinch to zoom works as on any page. Close, Escape or the dark area leaves. */
+function openLightbox(/** @type {string} */ id) {
+  const p = find(id);
+  if (!p) return;
+  closeLightbox();
+  lightboxFrom = document.activeElement;
+  const box = document.createElement('div');
+  box.className = 'lb';
+  box.setAttribute('role', 'dialog');
+  box.setAttribute('aria-modal', 'true');
+  box.setAttribute('aria-label', 'Photo full screen');
+  box.innerHTML = `<button class="b lb-x" type="button">Close</button><div class="lb-i"><img src="${p.url}" alt="${esc(has(p.caption) ? p.caption : 'Job photo')}"></div><div class="lb-c">${has(p.caption) ? '<b>' + esc(p.caption) + '</b>' : ''}<span>Added ${stampText(p.added)}</span></div>`;
+  document.body.appendChild(box);
+  document.body.classList.add('lb-open');
+  lightbox = box;
+  const x = box.querySelector('.lb-x');
+  if (x instanceof HTMLElement) x.focus();
+}
+
+function wireLightbox() {
+  document.addEventListener('click', (e) => {
+    const t = e.target instanceof Element ? e.target : null;
+    if (!t) return;
+    if (lightbox) {
+      if (t.closest('.lb-x') || t === lightbox || t.classList.contains('lb-i')) closeLightbox();
+      return;
+    }
+    const opener = t.closest('[data-open]');
+    const shown = t.closest('#paper .photopage img[data-pid]');
+    const id = opener instanceof HTMLElement ? opener.dataset.open : shown instanceof HTMLElement ? shown.dataset.pid : '';
+    if (id) openLightbox(id);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const x = lightbox.querySelector('.lb-x');
+      if (x instanceof HTMLElement) x.focus();
+    }
+  });
+}
+
 /** The page of ticked photos. Empty text when none are ticked. */
 function photoPage(/** @type {boolean} */ extra) {
   const picked = photos.filter((p) => p.print);
   if (!picked.length) return '';
   const job = get(PHOTOS_TAB, 'job');
-  const figures = picked.map((p, n) => `<figure><img src="${p.url}" alt="Job photo ${n + 1}">${has(p.caption) ? `<figcaption>${esc(p.caption)}</figcaption>` : ''}</figure>`).join('');
-  return `<div class="photopage${extra ? ' extra' : ''}"><div class="sec">JOB PHOTOS</div>${extra && has(job) ? `<p><b>Job:</b> ${esc(job)}</p>` : ''}<div class="pgrid">${figures}</div></div>`;
+  const one = get(PHOTOS_TAB, 'pp') === '1 per page (largest)';
+  const figures = picked.map((p, n) => `<figure><div class="pfr"><img src="${p.url}" alt="${esc(has(p.caption) ? p.caption : 'Job photo ' + (n + 1))}" data-pid="${esc(p.id)}"></div><figcaption><span class="pt">Photo ${n + 1}${has(p.caption) ? ' - ' + esc(p.caption) : ''}</span><span class="pdate">Added ${stampText(p.added)}</span></figcaption></figure>`).join('');
+  return `<div class="photopage${extra ? ' extra' : ''}${one ? ' one' : ''}"><div class="sec">JOB PHOTOS</div>${extra && has(job) ? `<p><b>Job:</b> ${esc(job)}</p>` : ''}<div class="pgrid">${figures}</div></div>`;
 }
 
 /** The Photos screen. */
@@ -140,10 +199,12 @@ export function photosScreen() {
   return `<div class="pg">${band('JOB PHOTOS')}<div class="leg">Take or choose photos of the job. They are made smaller and kept on this device only. Nothing is uploaded. Tick the ones you want on a PDF page.</div>
 ${sec('THE JOB')}
 ${row(PHOTOS_TAB, 'job', 'Job name or site', 't')}
+${row(PHOTOS_TAB, 'pp', 'Photos on each PDF page', 's', { options: ['2 per page', '1 per page (largest)'], ex: 'Two per page is large and clear. One per page fills the page.' })}
 ${sec('ADD PHOTOS')}
 <div class="ph-actions"><input class="vh" id="ph-take" type="file" accept="image/*" capture="environment"><label class="b o" for="ph-take">Take photo</label><input class="vh" id="ph-choose" type="file" accept="image/*" multiple><label class="b" for="ph-choose">Choose photos</label></div>
 <div class="warn" id="ph-msg"></div>
 <div class="note" id="ph-count"></div>
+<datalist id="ph-caps"><option value="Before"><option value="After"><option value="Fault found"><option value="Work completed"><option value="Damage"><option value="Materials used"></datalist>
 <div class="ph-grid" id="ph-grid"></div>
 <div class="btns"><button class="b" id="pv">Preview</button><button class="b o" id="pdf">Save as PDF</button><button class="b g" id="ph-clear">Remove all photos</button></div>
 ${note('Photos are only added to a PDF when you tick them. You can also add the ticked photos as an extra page on a Quote, Tax Invoice, Invoice, Variation or Progress Claim PDF.')}

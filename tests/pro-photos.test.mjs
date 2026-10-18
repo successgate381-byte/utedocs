@@ -185,7 +185,7 @@ await test('the Photos document shows only ticked photos, and typed words stay w
   await cards(pg).nth(0).locator('input[type=checkbox]').check();
   await pg.click('#pv');
   assert.equal(await pg.locator('#paper img').count(), 1);
-  assert.equal(await pg.locator('#paper figcaption').textContent(), 'Before: <b>old</b> board');
+  assert.equal(await pg.locator('#paper figcaption .pt').textContent(), 'Photo 1 - Before: <b>old</b> board');
   assert.equal(await pg.locator('#paper figcaption b').count(), 0);
   assert.ok((await pg.locator('#paper').textContent()).includes('Smith job'));
   assert.ok(await pg.locator('#paper img').evaluate((e) => e.complete && e.naturalWidth > 0), 'the picture did not load');

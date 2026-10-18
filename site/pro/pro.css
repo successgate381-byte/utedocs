@@ -36,18 +36,32 @@
 .vh:focus-visible + label { outline: 2px solid var(--or); outline-offset: 2px; }
 .ph-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 8px 16px; }
 .ph-card { border: 1px solid var(--line); border-radius: 8px; padding: 8px; display: grid; gap: 6px; background: #fff; }
-.ph-card img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; background: var(--calc); }
+.ph-card img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: contain; border-radius: 6px; background: var(--calc); }
 .ph-card input[type="text"] { font-size: 14px; min-height: 40px; }
 .ph-card .b { min-height: 40px; padding: 8px 12px; font-size: 14px; }
 .ph-tick, .ph-inc { display: flex; align-items: center; gap: 8px; font-size: 14px; }
 .ph-tick input, .ph-inc input { width: 22px; height: 22px; min-height: 0; padding: 0; flex: none; }
 .ph-inc { margin: 6px 16px; font-weight: 700; color: var(--navy); }
 .ph-inc span { font-weight: 400; color: var(--mut); }
-#paper .photopage .pgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 8px 16px; }
-#paper .photopage figure { margin: 0; break-inside: avoid; }
-#paper .photopage img { display: block; width: 100%; height: auto; border: 1px solid var(--line); }
-#paper .photopage figcaption { font-size: 11px; color: var(--mut); padding-top: 2px; }
-@media print { #paper .photopage.extra { break-before: page; } }
+#paper .photopage .pgrid { display: block; margin: 8px 16px; }
+#paper .photopage figure { margin: 0 0 14px; padding: 6px; border: 1px solid var(--line); border-radius: 6px; background: #fff; break-inside: avoid; }
+#paper .photopage .pfr { background: var(--calc); }
+#paper .photopage img { display: block; margin: 0 auto; width: auto; height: auto; max-width: 100%; max-height: 460px; cursor: zoom-in; }
+#paper .photopage.one img { max-height: 640px; }
+#paper .photopage figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; padding: 6px 2px 0; font-size: 13px; color: var(--ink); }
+#paper .photopage figcaption .pt { min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+#paper .photopage figcaption .pdate { color: var(--mut); font-size: 12px; white-space: nowrap; }
+@media print { #paper .photopage.extra { break-before: page; } #paper .photopage img { max-height: 100mm; cursor: auto; } #paper .photopage.one img { max-height: 205mm; } .lb { display: none; } }
+
+/* tap a photo to see it full screen */
+.ph-open { display: block; width: 100%; min-height: 0; padding: 0; border: 0; border-radius: 6px; background: none; cursor: zoom-in; }
+.lb { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; gap: 8px; padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)); background: #0b1220f2; }
+.lb .lb-x { align-self: flex-end; }
+.lb-i { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: auto; touch-action: pan-x pan-y pinch-zoom; }
+.lb-i img { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
+.lb-c { color: #fff; font-size: 15px; text-align: center; }
+.lb-c span { display: block; color: #c9d2e6; font-size: 12px; }
+body.lb-open { overflow: hidden; }
 
 /* P6: starter packs */
 .pk-flag { margin: 10px 16px; padding: 8px 12px; border-left: 4px solid var(--or); background: #fff4e5; color: #8a5a00; font-weight: 700; font-size: 13px; }
