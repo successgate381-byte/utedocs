@@ -4,8 +4,8 @@
 /* P2: signature pad */
 .sigpad { margin: 22px 16px 0; }
 .sigpad + .sg { margin-top: 16px; }
-.sigpad-h { font: 700 12px var(--font); color: var(--navy); margin-bottom: 6px; }
-.sigpad canvas { display: block; width: 100%; aspect-ratio: 5 / 2; background: var(--in); border: 1px dashed #b9a87a; border-radius: 8px; touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.sigpad-h { font: 700 12px var(--font); color: var(--head); margin-bottom: 6px; }
+.sigpad canvas { display: block; width: 100%; aspect-ratio: 5 / 2; background: #fffbeb; border: 1px dashed #b9a87a; border-radius: 8px; touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .sigpad .btns { margin: 8px 0 0; }
 .sigem { display: block; }
 .sigimg { display: block; height: 56px; width: auto; max-width: 100%; }
@@ -15,7 +15,7 @@
 .xe .btns { margin: 8px 0; }
 .xe .warn { margin: 4px 0; }
 .xe .note { margin: 4px 0; }
-.xe-check { border: 1px solid var(--line); border-left: 4px solid var(--or); border-radius: 6px; background: #fafbfd; padding: 10px 14px; margin: 8px 0; font-size: 13px; }
+.xe-check { border: 1px solid var(--line); border-left: 4px solid var(--or); border-radius: 6px; background: var(--soft); padding: 10px 14px; margin: 8px 0; font-size: 13px; }
 .xe-h { display: flex; justify-content: space-between; gap: 8px; font: 700 11px var(--font); letter-spacing: .07em; color: var(--or-dark); }
 .xe-st.ok { color: #067647; }
 .xe-st.warn { color: #8a5a00; }
@@ -35,13 +35,13 @@
 .ph-actions label.b { display: inline-flex; align-items: center; cursor: pointer; }
 .vh:focus-visible + label { outline: 2px solid var(--or); outline-offset: 2px; }
 .ph-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 8px 16px; }
-.ph-card { border: 1px solid var(--line); border-radius: 8px; padding: 8px; display: grid; gap: 6px; background: #fff; }
+.ph-card { border: 1px solid var(--line); border-radius: 8px; padding: 8px; display: grid; gap: 6px; background: var(--card); }
 .ph-card img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: contain; border-radius: 6px; background: var(--calc); }
 .ph-card input[type="text"] { font-size: 14px; min-height: 40px; }
 .ph-card .b { min-height: 40px; padding: 8px 12px; font-size: 14px; }
 .ph-tick, .ph-inc { display: flex; align-items: center; gap: 8px; font-size: 14px; }
 .ph-tick input, .ph-inc input { width: 22px; height: 22px; min-height: 0; padding: 0; flex: none; }
-.ph-inc { margin: 6px 16px; font-weight: 700; color: var(--navy); }
+.ph-inc { margin: 6px 16px; font-weight: 700; color: var(--head); }
 .ph-inc span { font-weight: 400; color: var(--mut); }
 #paper .photopage .pgrid { display: block; margin: 8px 16px; }
 #paper .photopage figure { margin: 0 0 14px; padding: 6px; border: 1px solid var(--line); border-radius: 6px; background: #fff; break-inside: avoid; }

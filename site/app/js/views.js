@@ -71,7 +71,7 @@ function lineRows(tab, withGst, heads) {
 export const payBlock = () => `${sec('PAYMENT DETAILS')}<div class="pd" id="c-pay1"></div>`;
 
 export const buttons = () =>
-  `<div class="btns"><button class="b" id="pv">Preview</button><button class="b o" id="pdf">Save as PDF</button><button class="b g" id="clr">Clear this document</button></div>` +
+  `<div class="warn" id="req2"></div><div class="btns"><button class="b" id="pv">Preview</button><button class="b o" id="pdf">Save as PDF</button><button class="b g" id="clr">Clear this document</button></div>` +
   note('Preview and Save as PDF show the clean finished document, without the empty boxes. In the print window choose Save as PDF as the printer. Your work is saved on this device only.');
 
 export const foot = () => note(FOOT);
@@ -123,7 +123,7 @@ function documentTab(tab) {
   h += q
     ? row(tab, 'valid', 'Valid until', 'c') + row(tab, 'phone', 'Phone / email', 't') + row(tab, 'start', 'Estimated start (optional)', 't', { ex: 'For example a date, or TBC on acceptance.' }) + row(tab, 'finish', 'Estimated completion (optional)', 't', { ex: 'For example 2 days from the start.' })
     : row(tab, 'due', 'Due date', 'c');
-  if (ti) h += row(tab, 'cabn', 'Customer ABN', 'abn');
+  if (ti) h += row(tab, 'cabn', 'Customer ABN', 'abn') + '<div class="warn" id="cabn-hint"></div>';
   h += row(tab, 'addr', 'Address', 't') + row(tab, 'site', q ? 'Job site' : 'Job address', 't');
   if (ti) h += '<div class="warn" id="req"></div>';
   if (q) h += sec('SCOPE AND PRICE') + row(tab, 'scope', 'Scope of work', 'a') + row(tab, 'ptype', 'Price type', 's', { options: PRICE_TYPES });

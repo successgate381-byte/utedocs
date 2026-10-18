@@ -61,7 +61,12 @@ function documentLive(tab) {
     L.textContent = leg;
     L.className = 'leg' + (bad ? ' bad' : '');
   }
-  setText('req', ti && v.total >= 1000 && !has(get(tab, 'cust')) && !has(get(tab, 'cabn')) ? 'REQUIRED: add the customer name or ABN. The ATO needs it when the total is $1,000 or more including GST.' : '');
+  const buyerAbn = get(tab, 'cabn');
+  const needBuyer = ti && v.total >= 1000 && !has(get(tab, 'cust')) && !(has(buyerAbn) && abnLooksValid(buyerAbn));
+  const needText = needBuyer ? 'REQUIRED: add the customer name or ABN. The ATO needs it when the total is $1,000 or more including GST.' : '';
+  setText('req', needText);
+  setText('req2', needText);
+  setText('cabn-hint', ti && has(buyerAbn) && !abnLooksValid(buyerAbn) ? 'This customer ABN does not look right. Check the 11 digits against the ABN Lookup site (abr.business.gov.au).' : '');
   if (ti) setText('c-gn', v.gstFree ? 'GST amount is shown above. Items marked No are GST-free.' : 'Total price includes GST of ' + money(v.gst));
   if (q) {
     setText('c-gn', reg ? 'All prices exclude GST. GST is added to items marked Yes.' : 'Not registered for GST. No GST charged.');

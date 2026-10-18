@@ -6,6 +6,9 @@ import { esc, formatAbn, formatBsb, has, money, num } from './format.js';
 import { refresh } from './live.js';
 import { changeLines, clearTab, get, load, put, view } from './state.js';
 import { renderTab } from './views.js';
+import { initTheme } from './theme.js';
+
+initTheme();
 
 /** @typedef {HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement} Box */
 
