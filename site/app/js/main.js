@@ -8,6 +8,7 @@ import { changeLines, clearTab, get, load, put, view } from './state.js';
 import { renderTab } from './views.js';
 import { initTheme } from './theme.js';
 import './forms.js';
+import { archiveQuote } from './recent.js';
 import './forms-swms.js';
 
 initTheme();
@@ -129,7 +130,8 @@ function onClick(/** @type {Event} */ ev) {
     window.print();
     document.title = old;
   }
-  if (t.id === 'clr' && confirm('Clear this document? Your business details stay.')) {
+  if (t.id === 'clr' && confirm(tab === 'Quote' ? 'Clear this quote? A copy stays in your last 3 quotes. Your business details stay.' : 'Clear this document? Your business details stay.')) {
+    if (tab === 'Quote') archiveQuote();
     clearTab(tab);
     go(tab);
   }

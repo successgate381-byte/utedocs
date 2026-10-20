@@ -6,6 +6,7 @@ import { addDays, esc, fmtDate, has, money, num } from './format.js';
 import { hooks } from './hooks.js';
 import { letterhead, paperFoot } from './paper.js';
 import { get, gstRate, lineCount, linesOf, put, registered } from './state.js';
+import { pickSource, sourceOptions } from './recent.js';
 import { band, foot, note, row, sec } from './views.js';
 
 export const FORMS_TAB = 'Forms';
@@ -171,8 +172,9 @@ ${row(T, 'jc_cdate', 'Customer sign date', 'd', { ex: 'Leave blank to write it b
 ${row(T, 'jc_tname', 'Your name', 't')}
 <div id="fm-sig-t"></div>
 ${row(T, 'jc_tdate', 'Your sign date', 'd')}
+${row(T, 'fm_src', 'Fill from which quote', 's', { options: sourceOptions(), ex: 'The current quote, or one of your last 3.' })}
 <div class="note" id="fm-msg"></div>
-${actions('<button class="b" id="fm-fill">Fill from my Quote tab</button>')}`;
+${actions('<button class="b" id="fm-fill">Fill from the quote chosen above</button>')}`;
 }
 
 function certPaper() {
@@ -197,7 +199,8 @@ function certPaper() {
 
 /** Copy the customer, address, number and scope from the Quote tab, into boxes that are empty. */
 function certFill() {
-  const from = { jc_cust: get('Quote', 'cust'), jc_addr: get('Quote', 'site') || get('Quote', 'addr'), jc_no: get('Quote', 'no'), jc_work: get('Quote', 'scope') };
+  const q = pickSource(get(T, 'fm_src'));
+  const from = { jc_cust: q.cust, jc_addr: q.site || q.addr, jc_no: q.no, jc_work: q.scope };
   let n = 0;
   for (const [k, v] of Object.entries(from)) {
     if (has(v) && !has(get(T, k))) {
@@ -205,7 +208,7 @@ function certFill() {
       n++;
     }
   }
-  message = n ? 'Filled ' + n + (n === 1 ? ' box' : ' boxes') + ' from your Quote tab. Anything you typed stays.' : 'Nothing to fill: your boxes already have words, or the Quote tab is empty.';
+  message = n ? 'Filled ' + n + (n === 1 ? ' box' : ' boxes') + ' from the quote you chose. Anything you typed stays.' : 'Nothing to fill: your boxes already have words, or there is no quote to fill from.';
   return n;
 }
 

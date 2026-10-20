@@ -4,8 +4,10 @@ import { setText } from './dom.js';
 import { esc, fmtDate, has } from './format.js';
 import { FORMS, FORMS_TAB, actions, datesLive, getMessage, lines, say } from './forms.js';
 import { buildPaper, letterhead, paperFoot } from './paper.js';
+import { pickSource } from './recent.js';
 import { get, put } from './state.js';
 import { note, row, sec } from './views.js';
+import { sourceOptions } from './recent.js';
 
 const T = FORMS_TAB;
 const MIN_STEPS = 3;
@@ -91,8 +93,9 @@ ${sec('6. MONITORING AND REVIEW')}
 ${row(T, 'sw_mon', 'Who checks the controls are working, and how often', 'a')}
 ${row(T, 'sw_rev', 'Reviewed by', 't')}
 ${row(T, 'sw_revd', 'Review date and any changes', 't')}
+${row(T, 'fm_src', 'Fill from which quote', 's', { options: sourceOptions(), ex: 'The current quote, or one of your last 3.' })}
 <div class="note" id="fm-msg"></div>
-${actions('<button class="b" id="fm-fill">Fill from my Quote tab</button>')}`;
+${actions('<button class="b" id="fm-fill">Fill from the quote chosen above</button>')}`;
 }
 
 function swmsLive() {
@@ -128,7 +131,8 @@ function swmsPaper() {
 
 /** Copy the site address and the description of the work from the Quote tab, into boxes that are empty. */
 function swmsFill() {
-  const from = { sw_site: get('Quote', 'site') || get('Quote', 'addr'), sw_desc: get('Quote', 'scope') };
+  const q = pickSource(get(T, 'fm_src'));
+  const from = { sw_site: q.site || q.addr, sw_desc: q.scope };
   let n = 0;
   for (const [k, v] of Object.entries(from)) {
     if (has(v) && !has(get(T, k))) {
@@ -136,7 +140,7 @@ function swmsFill() {
       n++;
     }
   }
-  say(n ? 'Filled ' + n + (n === 1 ? ' box' : ' boxes') + ' from your Quote tab. Anything you typed stays.' : 'Nothing to fill: your boxes already have words, or the Quote tab is empty.');
+  say(n ? 'Filled ' + n + (n === 1 ? ' box' : ' boxes') + ' from the quote you chose. Anything you typed stays.' : 'Nothing to fill: your boxes already have words, or there is no quote to fill from.');
   return n;
 }
 
