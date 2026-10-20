@@ -17,9 +17,9 @@ const PNG = /^data:image\/png;base64,[A-Za-z0-9+/=]+$/;
 /** @typedef {number[][]} Stroke */
 
 /** Read saved strokes. Anything odd is ignored, never trusted. */
-function readStrokes(tab) {
+function readStrokes(tab, key = 'sigstrokes') {
   try {
-    const raw = JSON.parse(get(tab, 'sigstrokes') || '[]');
+    const raw = JSON.parse(get(tab, key) || '[]');
     if (!Array.isArray(raw)) return [];
     return raw
       .filter(Array.isArray)
@@ -102,19 +102,39 @@ const clamp = (n) => Math.min(1, Math.max(0, Math.round(n * 10000) / 10000));
 /** Put the drawing pad above the typed name, signature and date. */
 export function mountPad(/** @type {string} */ tab) {
   const anchor = SIGN_TABS.includes(tab) ? $('.sg.edit') : null;
-  if (!anchor) return;
+  if (anchor) mountPadAt(anchor, { scope: tab, id: 'sg', title: 'Draw the client signature here (finger or Apple Pencil)', datesToo: true });
+}
+
+/** The two pads on the Job Completion Certificate: the customer's and yours. */
+export function mountCertPads(/** @type {string} */ tab) {
+  if (tab !== 'Forms') return;
+  const c = document.getElementById('fm-sig-c');
+  const t = document.getElementById('fm-sig-t');
+  if (c) mountPadAt(c, { scope: 'Forms', id: 'jc-c', title: 'Customer signature: draw here (finger or Apple Pencil)', imgKey: 'jc_csig', strokeKey: 'jc_cstr', dateKey: 'jc_cdate' });
+  if (t) mountPadAt(t, { scope: 'Forms', id: 'jc-t', title: 'Your signature: draw here', imgKey: 'jc_tsig', strokeKey: 'jc_tstr', dateKey: 'jc_tdate' });
+}
+
+/**
+ * Put a drawing pad in front of an element. It saves its strokes and picture under the keys given.
+ * @param {Element} anchor
+ * @param {{ scope: string, id: string, title: string, datesToo?: boolean, imgKey?: string, strokeKey?: string, dateKey?: string }} o
+ */
+export function mountPadAt(anchor, o) {
+  const tab = o.scope;
+  const imgKey = o.imgKey || 'sigimg';
+  const strokeKey = o.strokeKey || 'sigstrokes';
   const box = document.createElement('div');
   box.className = 'sigpad';
   box.innerHTML =
-    '<div class="sigpad-h">Draw the client signature here (finger or Apple Pencil)</div>' +
-    '<canvas id="sg-pad" role="img" aria-label="Signature pad"></canvas>' +
-    '<div class="btns tight"><button class="b g" id="sg-undo">Undo</button><button class="b g" id="sg-clear">Clear signature</button></div>';
+    `<div class="sigpad-h">${o.title}</div>` +
+    `<canvas id="${o.id}-pad" role="img" aria-label="Signature pad"></canvas>` +
+    `<div class="btns tight"><button class="b g" id="${o.id}-undo">Undo</button><button class="b g" id="${o.id}-clear">Clear signature</button></div>`;
   anchor.before(box);
   const canvas = box.querySelector('canvas');
   const ctx = canvas ? canvas.getContext('2d', { desynchronized: true }) : null;
   if (!canvas || !ctx) return;
 
-  let strokes = readStrokes(tab);
+  let strokes = readStrokes(tab, strokeKey);
   /** @type {Stroke | null} */
   let current = null;
 
@@ -131,15 +151,20 @@ export function mountPad(/** @type {string} */ tab) {
 
   /** Save the strokes and the picture. Add today's date if the date box is empty. */
   const save = () => {
-    put(tab, 'sigstrokes', JSON.stringify(strokes));
-    put(tab, 'sigimg', strokes.length ? toPng(strokes) : '');
+    put(tab, strokeKey, JSON.stringify(strokes));
+    put(tab, imgKey, strokes.length ? toPng(strokes) : '');
+    if (o.dateKey && strokes.length && !has(get(tab, o.dateKey))) {
+      put(tab, o.dateKey, today());
+      const own = $('#i-' + o.dateKey);
+      if (own instanceof HTMLInputElement) own.value = today();
+    }
     const dateBox = $('#i-ad');
-    if (strokes.length && !has(get(tab, 'ad'))) {
+    if (o.datesToo && strokes.length && !has(get(tab, 'ad'))) {
       put(tab, 'ad', today());
       put(tab, 'sigdate', today());
       if (dateBox instanceof HTMLInputElement) dateBox.value = today();
     }
-    if (!strokes.length && has(get(tab, 'sigdate')) && get(tab, 'ad') === get(tab, 'sigdate')) {
+    if (o.datesToo && !strokes.length && has(get(tab, 'sigdate')) && get(tab, 'ad') === get(tab, 'sigdate')) {
       put(tab, 'ad', '');
       put(tab, 'sigdate', '');
       if (dateBox instanceof HTMLInputElement) dateBox.value = '';
@@ -221,8 +246,8 @@ export function mountPad(/** @type {string} */ tab) {
   canvas.addEventListener('pointercancel', end);
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
-  const undo = box.querySelector('#sg-undo');
-  const clear = box.querySelector('#sg-clear');
+  const undo = box.querySelector('#' + o.id + '-undo');
+  const clear = box.querySelector('#' + o.id + '-clear');
   if (undo) undo.addEventListener('click', () => { strokes.pop(); repaint(); save(); });
   if (clear) clear.addEventListener('click', () => { strokes = []; repaint(); save(); });
 }

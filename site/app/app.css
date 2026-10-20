@@ -17,6 +17,29 @@
   --font: system-ui, -apple-system, "Segoe UI", Roboto, Arial, Helvetica, sans-serif;
   color-scheme: light;
 }
+/* ---------- Forms tab ---------- */
+.fm-pick { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px 2px; }
+.fm-pick .b { flex: 1 1 140px; }
+.fm-t { margin: 10px 16px; }
+.fm-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+.fm-h b { color: var(--head); }
+.fm-text { padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--soft); font-size: 14px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fm-cp { min-height: 40px; padding: 0 14px; }
+.fm-hide { position: fixed; left: -9999px; top: 0; }
+#paper .fm-box { margin: 4px 16px 8px; padding: 6px 0; min-height: 62px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+
+.fm-ck { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 0 16px; font-size: 15px; }
+.fm-ck input { width: 22px; height: 22px; flex: none; }
+.fm-step { margin: 10px 16px; padding: 4px 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); }
+.fm-step h4 { margin: 8px 16px 0; font-size: 14px; color: var(--head); }
+#paper .ck { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 16px; margin: 6px 16px; font-size: 12.5px; }
+#paper .ckr { display: flex; gap: 6px; align-items: flex-start; break-inside: avoid; }
+#paper .bx { flex: none; position: relative; width: 13px; height: 13px; margin-top: 1px; border: 1.5px solid #1f2937; border-radius: 2px; }
+#paper .bx.on::after { content: ''; position: absolute; left: 3px; top: -1px; width: 4px; height: 9px; border: solid #1f2937; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+#paper .swt th { font-size: 10.5px; }
+#paper .swt td { height: 30px; vertical-align: top; font-size: 11px; overflow-wrap: anywhere; }
+#paper .fm-line { min-height: 26px; margin: 6px 16px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+
 /* ---------- dark screens. The finished document and the printed page never change. ---------- */
 :root[data-theme="dark"] { color-scheme: dark; --bg: #0e1424; --card: #172036; --soft: #1b2540; --in: #222c46; --calc: #1c2641; --line: #36425d; --ink: #e8ecf5; --mut: #a9b3c7; --bad: #ff8a80; --navy: #2a3a5e; --navy-2: #3a4c75; --or-dark: #ffb066; --head: #e3e9f7; }
 :root[data-theme="dark"] .pg .sg .c > span, :root[data-theme="dark"] .pg .sg .c > label { color: var(--mut); }

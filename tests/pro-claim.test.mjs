@@ -87,7 +87,7 @@ await test('the tab sits right after Variation, in Pro only', async () => {
   const pro = await open('/pro/');
   const names = await pro.locator('nav button').allTextContents();
   assert.equal(names[names.indexOf('Variation') + 1], 'Progress Claim');
-  assert.equal(names.length, 11);
+  assert.equal(names.length, 12);
   const lite = await open('/app/');
   assert.equal((await lite.locator('nav button').allTextContents()).includes('Progress Claim'), false);
 });

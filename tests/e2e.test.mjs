@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 import { startServer } from '../scripts/serve.mjs';
 
-const TABS = ['Start Here', 'My Details', 'Quote', 'Tax Invoice', 'Invoice', 'Variation', 'Rate Calculator', 'Line Items', 'Worked Examples'];
+const TABS = ['Start Here', 'My Details', 'Quote', 'Tax Invoice', 'Invoice', 'Variation', 'Rate Calculator', 'Line Items', 'Worked Examples', 'Forms'];
 const server = await startServer('site', 0);
 const ORIGIN = 'http://127.0.0.1:' + server.address().port;
 const URL = ORIGIN + '/app/';

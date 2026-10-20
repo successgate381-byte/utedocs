@@ -1,7 +1,7 @@
 // Everything that makes Pro different from Lite is added here, through the hooks.
 import { $ } from '../../app/js/dom.js';
 import { hooks } from '../../app/js/hooks.js';
-import { mountPad, signaturePaper } from './signature.js';
+import { mountCertPads, mountPad, signaturePaper } from './signature.js';
 import { CLAIM_TAB, claimLive, claimPaper, claimScreen } from './claim.js';
 import { mountXero, updateXeroCheck } from './xero.js';
 import { PHOTOS_TAB, addPhotoPage, initPhotos, mountPhotos, photosPaper, photosScreen } from './photos.js';
@@ -17,6 +17,7 @@ hooks.afterRender.push((tab) => {
 
 // P2: client signature pad on Quote and Variation.
 hooks.afterRender.push((tab) => mountPad(tab));
+hooks.afterRender.push((tab) => mountCertPads(tab));
 hooks.paperAfter.push((html, tab) => signaturePaper(html, tab));
 
 // P3: progress claim tab, straight after Variation, with its own finished document.

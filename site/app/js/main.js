@@ -7,6 +7,8 @@ import { refresh } from './live.js';
 import { changeLines, clearTab, get, load, put, view } from './state.js';
 import { renderTab } from './views.js';
 import { initTheme } from './theme.js';
+import './forms.js';
+import './forms-swms.js';
 
 initTheme();
 
