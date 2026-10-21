@@ -3,7 +3,8 @@ import { isEstimate } from './data.js';
 import { firstText, hooks, pipe } from './hooks.js';
 import { addDays, esc, fmtDate, has, money, num, round2, safeUrl } from './format.js';
 import { depositFraction, leftToPay, sumLines, variationNewTotal } from './calc.js';
-import { get, gstRate, lineCount, linesOf, registered } from './state.js';
+import { get, gstRate, isLM, lineCount, linesOf, registered } from './state.js';
+import { lmSubtotals, lmTables } from './lm.js';
 
 const TITLES = { Quote: 'QUOTE', 'Tax Invoice': 'TAX INVOICE', Invoice: 'INVOICE', Variation: 'VARIATION' };
 
@@ -85,15 +86,17 @@ export function buildPaper(tab) {
   if (vr) h += kv('Why the change', g('why') === 'Other' && has(g('whyo')) ? g('whyo') : g('why') || 'Customer asked for it') + kv('What is changing', g('desc'));
 
   let rows = '';
-  for (let i = 1; i <= n; i++) {
+  for (let i = 1; i <= (isLM(tab) ? 0 : n); i++) {
     const used = has(g('q' + i)) && has(g('p' + i));
     if (!used && !has(g('d' + i))) continue;
     rows += `<tr><td>${esc(g('d' + i))}</td><td class="n">${esc(g('q' + i))}</td><td class="n">${used ? money(num(g('p' + i))) : ''}</td>${showGst ? `<td>${g('g' + i) === 'No' ? 'No' : 'Yes'}</td>` : ''}<td class="n">${used ? money(round2(num(g('q' + i)) * num(g('p' + i)))) : ''}</td></tr>`;
   }
   const ex = showGst ? ' (ex GST)' : '';
+  if (isLM(tab)) h += lmTables(tab, showGst);
   if (rows) h += `<table><thead><tr><th>Description</th><th class="n">Qty</th><th class="n">${q || vr ? 'Unit price' : 'Price'}${ex}</th>${showGst ? '<th>GST?</th>' : ''}<th class="n">Amount${ex}</th></tr></thead><tbody>${rows}</tbody></table>`;
 
   h += '<div class="tot">';
+  if (isLM(tab)) h += lmSubtotals(tab, tt, ex);
   h += tt('Subtotal' + ex, money(v.sub)) + (showGst ? tt(gstLabel(showGst), money(v.gst)) : '');
   h += tt(vr ? 'THIS VARIATION' + (showGst ? ' (incl GST)' : '') : ti ? 'TOTAL PAYABLE (incl GST)' : q ? (isEstimate(g('ptype')) ? 'ESTIMATED TOTAL' : 'TOTAL') + (showGst ? ' (incl GST)' : '') : 'TOTAL PAYABLE', money(v.total), 'big');
   if (ti) h += `<p class="sm">${v.gstFree ? 'GST amount is shown above. Items marked No are GST-free.' : 'Total price includes GST of ' + money(v.gst)}</p>`;

@@ -187,8 +187,11 @@ export const DEFAULTS = {
   Variation: { pay: 'Added to the final invoice', prev: '$0.00' },
 };
 
-export const PRICE_TYPES = ['Fixed price', 'Estimate (final price based on actual hours and materials)'];
+export const HOURLY = 'Hourly rate (labour hours plus materials)';
+export const COST_PLUS = 'Cost plus (materials at cost plus an agreed markup)';
+export const PRICE_TYPES = ['Fixed price', 'Estimate (final price based on actual hours and materials)', HOURLY, COST_PLUS];
+export const INVOICE_TYPES = ['Items and prices', HOURLY, COST_PLUS];
 /** True when the Price type box says Estimate. */
-export const isEstimate = (v) => String(v ?? '').startsWith('Estimate');
+export const isEstimate = (v) => /^(Estimate|Hourly|Cost plus)/.test(String(v ?? ''));
 export const WHY_OPTIONS = ['Customer asked for it', 'Hidden problem found', 'Rule or compliance change', 'Material or supplier change', 'Other'];
 export const MARKUPS = [10, 15, 20, 25, 30, 40, 50];

@@ -65,8 +65,53 @@ export function lineCount(tab) {
   return Math.min(MAX_LINES, Math.max(minLines(tab), parseInt(get(tab, 'n'), 10) || 0));
 }
 
+/* ---------- Hourly rate and Cost plus: labour rows and materials rows ---------- */
+export const MAX_LM = 15;
+/** Documents priced by the hour, or at cost plus, keep labour rows and materials rows. */
+export const isLM = (tab) => /^(Hourly|Cost plus)/.test(get(tab, 'ptype') || '');
+const rowsFor = (tab, key) => Math.min(MAX_LM, Math.max(1, parseInt(get(tab, key), 10) || 3));
+export const labourCount = (tab) => rowsFor(tab, 'ln');
+export const materialCount = (tab) => rowsFor(tab, 'mn');
+const nz = (x) => {
+  const v = parseFloat(String(x ?? '').replace(/[^0-9.-]/g, ''));
+  return Number.isFinite(v) ? v : 0;
+};
+const cents = (x) => Math.round(x * 100) / 100;
+
+/** The labour and materials rows with their amounts. Labour has no markup. Materials are cost times quantity, plus the markup. */
+export function lmRows(tab) {
+  const fallback = nz(get(tab, 'mk'));
+  const labour = Array.from({ length: labourCount(tab) }, (_, i) => {
+    const k = i + 1;
+    const used = get(tab, 'lh' + k) !== '' && get(tab, 'lr' + k) !== '';
+    const hours = nz(get(tab, 'lh' + k));
+    const rate = nz(get(tab, 'lr' + k));
+    return { date: get(tab, 'lt' + k), d: get(tab, 'ld' + k), hours, rate, used, total: used ? cents(hours * rate) : 0 };
+  });
+  const mats = Array.from({ length: materialCount(tab) }, (_, i) => {
+    const k = i + 1;
+    const used = get(tab, 'mc' + k) !== '';
+    const qty = get(tab, 'mq' + k) === '' ? 1 : nz(get(tab, 'mq' + k));
+    const cost = nz(get(tab, 'mc' + k));
+    const pct = get(tab, 'mm' + k) === '' ? fallback : nz(get(tab, 'mm' + k));
+    const unit = cost * (1 + pct / 100);
+    return { d: get(tab, 'md' + k), qty, cost, pct, unit, used, total: used ? cents(qty * unit) : 0 };
+  });
+  return { labour, mats };
+}
+
+/** The same rows as plain lines (description, quantity, price, GST), all taxable. */
+export function lmLines(tab) {
+  const { labour, mats } = lmRows(tab);
+  return [
+    ...labour.map((r) => ({ d: r.d, q: r.used ? String(r.hours) : '', p: r.used ? String(r.rate) : '', g: 'Yes' })),
+    ...mats.map((r) => ({ d: r.d, q: r.used ? String(r.qty) : '', p: r.used ? String(+r.unit.toFixed(6)) : '', g: 'Yes' })),
+  ];
+}
+
 /** The lines of a document as plain objects. */
 export function linesOf(tab, count = lineCount(tab)) {
+  if (isLM(tab)) return lmLines(tab);
   return Array.from({ length: count }, (_, i) => ({
     d: get(tab, 'd' + (i + 1)),
     q: get(tab, 'q' + (i + 1)),

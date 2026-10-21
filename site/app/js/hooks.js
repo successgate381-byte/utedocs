@@ -4,7 +4,7 @@ import { DOC_TABS, TABS } from './data.js';
 
 /** @typedef {(...args: any[]) => any} Hook */
 
-/** @type {{ edition: string, tabs: string[], docTabs: string[], render: Hook[], afterRender: Hook[], refresh: Hook[], paperFull: Hook[], paperAfter: Hook[], click: Hook[], tabAfter: Record<string, string[]> }} */
+/** @type {{ edition: string, tabs: string[], docTabs: string[], render: Hook[], lines: Hook[], afterRender: Hook[], refresh: Hook[], paperFull: Hook[], paperAfter: Hook[], click: Hook[], tabAfter: Record<string, string[]> }} */
 export const hooks = {
   /** Which edition is running: "lite" or "pro". Pro sets this in register.js. */
   edition: 'lite',
@@ -20,6 +20,7 @@ export const hooks = {
   refresh: [],
   /** (tab) => the whole finished document for a tab that Lite does not draw, or null. */
   paperFull: [],
+  lines: [],
   /** (html, tab) => the finished document HTML, changed. */
   paperAfter: [],
   /** (button, tab) => run on every button tap. */

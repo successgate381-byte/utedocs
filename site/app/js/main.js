@@ -8,6 +8,7 @@ import { changeLines, clearTab, get, load, put, view } from './state.js';
 import { renderTab } from './views.js';
 import { initTheme } from './theme.js';
 import './forms.js';
+import './lm.js';
 import { archiveQuote } from './recent.js';
 import './forms-swms.js';
 

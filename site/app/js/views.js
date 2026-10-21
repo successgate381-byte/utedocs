@@ -1,5 +1,5 @@
 // The editing screens. Each tab builds a string of HTML. Nothing here reads the page.
-import { ATO_STAMP, EXCLUSIONS, FOOT, LISTS, MARKUPS, NOTES, PRICE_TYPES, PRIVACY, TRADES, UNITS, WHY_OPTIONS } from './data.js';
+import { ATO_STAMP, EXCLUSIONS, FOOT, INVOICE_TYPES, LISTS, MARKUPS, NOTES, PRICE_TYPES, PRIVACY, TRADES, UNITS, WHY_OPTIONS } from './data.js';
 import { esc } from './format.js';
 import { marginForMarkup } from './calc.js';
 import { get, lineCount, tradeName } from './state.js';
@@ -126,8 +126,10 @@ function documentTab(tab) {
   if (ti) h += row(tab, 'cabn', 'Customer ABN', 'abn') + '<div class="warn" id="cabn-hint"></div>';
   h += row(tab, 'addr', 'Address', 't') + row(tab, 'site', q ? 'Job site' : 'Job address', 't');
   if (ti) h += '<div class="warn" id="req"></div>';
+  if (!q) h += row(tab, 'ptype', 'How the job is priced', 's', { options: INVOICE_TYPES });
   if (q) h += sec('SCOPE AND PRICE') + row(tab, 'scope', 'Scope of work', 'a') + row(tab, 'ptype', 'Price type', 's', { options: PRICE_TYPES });
-  h += '<div class="gap"></div>' + lineRows(tab, tab !== 'Invoice', ['Description', q ? 'Unit price (ex GST)' : ti ? 'Price (ex GST)' : 'Unit price', q || ti ? 'Amount (ex GST)' : 'Amount']);
+  const lm = firstText(hooks.lines, tab);
+  h += '<div class="gap"></div>' + (lm !== null ? lm : lineRows(tab, tab !== 'Invoice', ['Description', q ? 'Unit price (ex GST)' : ti ? 'Price (ex GST)' : 'Unit price', q || ti ? 'Amount (ex GST)' : 'Amount']));
   if (tab === 'Invoice') h += total('TOTAL PAYABLE', 't4', 'big') + note('GST not applicable. Supplier is not registered for GST.');
   else h += total('Subtotal (ex GST)', 't1') + total('GST', 't3') + total(ti ? 'TOTAL PAYABLE (incl GST)' : 'TOTAL', 't4', 'big') + '<div class="note" id="c-gn"></div>';
   if (q) {

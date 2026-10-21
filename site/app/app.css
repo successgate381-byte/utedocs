@@ -40,6 +40,17 @@
 #paper .swt td { height: 30px; vertical-align: top; font-size: 11px; overflow-wrap: anywhere; }
 #paper .fm-line { min-height: 26px; margin: 6px 16px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
 
+/* ---------- Hourly rate and Cost plus ---------- */
+.lmr { margin: 10px 16px; padding: 4px 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); }
+.lmr h4 { margin: 8px 12px 4px; font-size: 14px; color: var(--head); }
+.lmr input { display: block; width: calc(100% - 24px); min-height: 44px; margin: 6px 12px 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--in); color: var(--ink); font: inherit; }
+.lm3, .lm4 { display: grid; gap: 6px; margin: 0 12px; align-items: end; }
+.lm3 { grid-template-columns: 1fr 1fr 1fr; }
+.lm4 { grid-template-columns: 1fr 1.2fr 1fr 1.2fr; }
+.lm3 input, .lm4 input { width: 100%; margin: 6px 0 0; }
+.amt { align-self: center; text-align: right; font-weight: 700; color: var(--head); overflow-wrap: anywhere; }
+.lm-sub { display: flex; justify-content: space-between; gap: 8px; margin: 8px 16px; font-weight: 700; color: var(--head); }
+
 /* ---------- dark screens. The finished document and the printed page never change. ---------- */
 :root[data-theme="dark"] { color-scheme: dark; --bg: #0e1424; --card: #172036; --soft: #1b2540; --in: #222c46; --calc: #1c2641; --line: #36425d; --ink: #e8ecf5; --mut: #a9b3c7; --bad: #ff8a80; --navy: #2a3a5e; --navy-2: #3a4c75; --or-dark: #ffb066; --head: #e3e9f7; }
 :root[data-theme="dark"] .pg .sg .c > span, :root[data-theme="dark"] .pg .sg .c > label { color: var(--mut); }
