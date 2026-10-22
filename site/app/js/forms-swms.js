@@ -5,6 +5,7 @@ import { esc, fmtDate, has } from './format.js';
 import { FORMS, FORMS_TAB, actions, datesLive, getMessage, lines, say } from './forms.js';
 import { buildPaper, letterhead, paperFoot } from './paper.js';
 import { pickSource } from './recent.js';
+import { parseDmy, toDmy } from './dmy.js';
 import { get, put } from './state.js';
 import { note, row, sec } from './views.js';
 import { sourceOptions } from './recent.js';
@@ -13,6 +14,9 @@ const T = FORMS_TAB;
 const MIN_STEPS = 3;
 const MAX_STEPS = 12;
 const RISK = ['Choose', 'Low', 'Medium', 'High'];
+const MIN_WORKERS = 1;
+const MAX_WORKERS = 12;
+const DEFAULT_WORKERS = 4;
 
 const HRCW = [
   'Risk of a person falling more than 2 metres',
@@ -37,14 +41,78 @@ const HRCW = [
 const PPE = ['Hard hat', 'Safety glasses', 'Hearing protection', 'Gloves', 'Safety boots', 'Hi-vis clothing', 'Respirator or dust mask', 'Harness'];
 
 const steps = () => Math.max(MIN_STEPS, Math.min(MAX_STEPS, Math.round(Number(get(T, 'sw_n')) || 4)));
+const workerCount = () => Math.max(MIN_WORKERS, Math.min(MAX_WORKERS, Math.round(Number(get(T, 'sw_wn')) || DEFAULT_WORKERS)));
+
+/** One worker's three date boxes joined like 20/10/26. Empty when all three boxes are empty. */
+const typedDate = (/** @type {number} */ i) => {
+  const p = ['d', 'm', 'y'].map((x) => get(T, 'sw_wd' + x + i).trim());
+  return p.some(Boolean) ? p.join('/') : '';
+};
+
+/** What the date column shows: a real date as 20 Oct 2026, or the numbers typed when they are not a date. */
+const signedOn = (/** @type {string} */ typed) => (parseDmy(typed) ? fmtDate(parseDmy(typed)) : typed.split('/').filter(Boolean).join('/'));
+
+/** Older saved forms had one box of names and one signing date. Move them into one row per worker, once. */
+function moveOldNames() {
+  if (get(T, 'sw_wm') === '1') return;
+  const names = get(T, 'sw_workers').split('\n').map((x) => x.trim()).filter(Boolean).slice(0, MAX_WORKERS);
+  if (names.length === 0) return;
+  const date = toDmy(get(T, 'sw_signed'));
+  names.forEach((n, i) => {
+    put(T, 'sw_wk' + (i + 1), n);
+    if (date) put(T, 'sw_wd' + (i + 1), date);
+  });
+  put(T, 'sw_wn', String(Math.max(DEFAULT_WORKERS, names.length)));
+  put(T, 'sw_workers', '');
+  put(T, 'sw_signed', '');
+  put(T, 'sw_wm', '1');
+}
+
+/** A date typed into one box (the first layout) moves into the day, month and year boxes. */
+function splitTypedDates() {
+  for (let i = 1; i <= MAX_WORKERS; i++) {
+    const old = get(T, 'sw_wd' + i);
+    if (!has(old)) continue;
+    const m = /^\s*(\d{1,2})\D+(\d{1,2})\D+(\d{2}|\d{4})\s*$/.exec(old);
+    if (m && !has(get(T, 'sw_wdd' + i)) && !has(get(T, 'sw_wdm' + i)) && !has(get(T, 'sw_wdy' + i))) {
+      put(T, 'sw_wdd' + i, m[1]);
+      put(T, 'sw_wdm' + i, m[2]);
+      put(T, 'sw_wdy' + i, m[3]);
+    }
+    put(T, 'sw_wd' + i, '');
+  }
+}
+
+function moveOldWorkers() {
+  moveOldNames();
+  splitTypedDates();
+}
+
+/** Day, month and year in three small boxes, so the date reads like 20 / 10 / 26. */
+function dateBoxes(/** @type {number} */ i) {
+  const box = (/** @type {string} */ part, /** @type {string} */ ph, /** @type {number} */ len, /** @type {string} */ name) =>
+    `<input type="text" inputmode="numeric" maxlength="${len}" placeholder="${ph}" aria-label="Worker ${i} ${name}" autocomplete="off"${part === 'y' ? ' class="yy"' : ''} data-s="${T}" data-k="sw_wd${part}${i}" id="i-sw_wd${part}${i}">`;
+  return `<div class="fr"><label for="i-sw_wdd${i}">Date signed</label><div class="dmy">${box('d', 'dd', 2, 'day')}<span>/</span>${box('m', 'mm', 2, 'month')}<span>/</span>${box('y', 'yy', 4, 'year')}</div></div>`;
+}
+
+function workerCards() {
+  moveOldWorkers();
+  let h = '';
+  for (let i = 1; i <= workerCount(); i++) {
+    h += `<div class="fm-wk"><h4>Worker ${i}</h4>${row(T, 'sw_wk' + i, 'Name', 't')}${dateBoxes(i)}</div>`;
+  }
+  return h;
+}
+
 const on = (/** @type {string} */ k) => get(T, k) === '1';
 const risk = (/** @type {string} */ v) => (v === 'Choose' ? '' : v);
 
 function keys() {
-  const k = ['sw_n', 'sw_prin', 'sw_site', 'sw_date', 'sw_by', 'sw_desc', 'sw_hx', 'sw_hxt', 'sw_px', 'sw_pxt', 'sw_fa', 'sw_hos', 'sw_ec', 'sw_addr', 'sw_rep', 'sw_workers', 'sw_signed', 'sw_mon', 'sw_rev', 'sw_revd'];
+  const k = ['sw_n', 'sw_prin', 'sw_site', 'sw_date', 'sw_by', 'sw_desc', 'sw_hx', 'sw_hxt', 'sw_px', 'sw_pxt', 'sw_fa', 'sw_hos', 'sw_ec', 'sw_addr', 'sw_rep', 'sw_workers', 'sw_signed', 'sw_wn', 'sw_wm', 'sw_mon', 'sw_rev', 'sw_revd'];
   HRCW.forEach((_t, i) => k.push('sw_h' + (i + 1)));
   PPE.forEach((_t, i) => k.push('sw_p' + (i + 1)));
   for (let i = 1; i <= MAX_STEPS; i++) k.push('sw_t' + i, 'sw_z' + i, 'sw_rb' + i, 'sw_c' + i, 'sw_ra' + i, 'sw_w' + i);
+  for (let i = 1; i <= MAX_WORKERS; i++) k.push('sw_wk' + i, 'sw_wd' + i, 'sw_wdd' + i, 'sw_wdm' + i, 'sw_wdy' + i);
   return k;
 }
 
@@ -87,8 +155,10 @@ ${row(T, 'sw_ec', 'Emergency contact (name and phone)', 't')}
 ${row(T, 'sw_addr', 'Site address for an ambulance', 't')}
 ${row(T, 'sw_rep', 'How incidents are reported', 't')}
 ${sec('5. WORKERS CONSULTED')}
-${row(T, 'sw_workers', 'Names of the workers consulted', 'a', { ex: 'One name per line. They sign on the printed page.' })}
-${row(T, 'sw_signed', 'Date the workers signed', 'd', { ex: 'Leave blank to write it by hand.' })}
+${note('One row for each worker. Type the day, month and year they signed in the three boxes, or leave them blank to write it by hand. They sign on the printed page.')}
+${workerCards()}
+<div class="warn" id="wd-hint"></div>
+<div class="btns"><button class="b g" id="fm-addwk"${workerCount() >= MAX_WORKERS ? ' disabled' : ''}>+ Add a worker</button><button class="b g" id="fm-rmwk"${workerCount() <= MIN_WORKERS ? ' disabled' : ''}>Remove the last worker</button></div>
 ${sec('6. MONITORING AND REVIEW')}
 ${row(T, 'sw_mon', 'Who checks the controls are working, and how often', 'a')}
 ${row(T, 'sw_rev', 'Reviewed by', 't')}
@@ -101,6 +171,12 @@ ${actions('<button class="b" id="fm-fill">Fill from the quote chosen above</butt
 function swmsLive() {
   setText('fm-msg', getMessage());
   datesLive();
+  const bad = [];
+  for (let i = 1; i <= workerCount(); i++) {
+    const typed = typedDate(i);
+    if (has(typed) && !parseDmy(typed)) bad.push(i);
+  }
+  setText('wd-hint', bad.length ? 'Worker ' + bad.join(', ') + (bad.length === 1 ? ': that is not a date yet.' : ': those are not dates yet.') + ' Type it like 20/10/26.' : '');
 }
 
 function swmsPaper() {
@@ -120,9 +196,10 @@ function swmsPaper() {
   h += `<div class="sec">2. TASK STEPS, HAZARDS AND CONTROLS</div><table class="swt"><thead><tr><th class="n">#</th><th>Task</th><th>Hazard</th><th>Risk before</th><th>Control measures</th><th>Risk after</th><th>Who</th></tr></thead><tbody>${body}</tbody></table>`;
   h += '<div class="sec">3. PERSONAL PROTECTIVE EQUIPMENT</div>' + checks(PPE, 'sw_p', 'sw_px', g('sw_pxt'));
   h += '<div class="sec">4. EMERGENCY DETAILS</div>' + kl('First aid kit', g('sw_fa')) + kl('Nearest hospital', g('sw_hos')) + kl('Emergency contact', g('sw_ec')) + kl('Site address for an ambulance', g('sw_addr')) + kl('Incidents are reported', g('sw_rep'));
-  const names = g('sw_workers').split('\n').map((x) => x.trim()).filter(Boolean).slice(0, MAX_STEPS);
+  moveOldWorkers();
+  const shown = workerCount();
   let who = '';
-  for (let i = 0; i < Math.max(4, names.length); i++) who += `<tr><td>${esc(names[i] || '')}</td><td></td><td>${names[i] && has(g('sw_signed')) ? esc(fmtDate(g('sw_signed'))) : ''}</td></tr>`;
+  for (let i = 1; i <= Math.max(4, shown); i++) who += `<tr><td>${i <= shown ? esc(g('sw_wk' + i).trim()) : ''}</td><td></td><td>${i <= shown ? esc(signedOn(typedDate(i))) : ''}</td></tr>`;
   h += `<div class="sec">5. WORKERS CONSULTED AND SIGN-ON</div><table class="swt"><thead><tr><th>Name</th><th>Signature</th><th>Date</th></tr></thead><tbody>${who}</tbody></table>`;
   h += '<div class="sec">6. MONITORING AND REVIEW</div>' + kl('Controls are checked by', g('sw_mon')) + kl('Reviewed by', g('sw_rev')) + kl('Review date and changes', g('sw_revd'));
   h += '<p class="sm">Review this SWMS whenever the work changes, if the controls are not working, and after any incident. Keep a copy at the work site for as long as the work lasts.</p>';
@@ -160,7 +237,46 @@ document.addEventListener('change', (e) => {
 
 document.addEventListener('click', (e) => {
   const b = e.target instanceof Element ? e.target.closest('button') : null;
+  if (b && (b.id === 'fm-addwk' || b.id === 'fm-rmwk')) {
+    put(T, 'sw_wn', String(workerCount() + (b.id === 'fm-addwk' ? 1 : -1)));
+    reopen();
+    return;
+  }
   if (!b || (b.id !== 'fm-addstep' && b.id !== 'fm-rmstep')) return;
   put(T, 'sw_n', String(steps() + (b.id === 'fm-addstep' ? 1 : -1)));
   reopen();
+});
+
+/* The three date boxes: only digits, and the cursor moves on by itself. */
+const dateBox = (/** @type {EventTarget | null} */ t) => (t instanceof HTMLInputElement && /^sw_wd[dmy]\d+$/.test(t.dataset.k || '') ? t : null);
+
+/** The box before (step -1) or after (step 1) this one, in the same worker row. */
+function neighbour(/** @type {HTMLInputElement} */ t, /** @type {number} */ step) {
+  const parts = ['d', 'm', 'y'];
+  const k = t.dataset.k || '';
+  const to = parts.indexOf(k.charAt(5)) + step;
+  return to >= 0 && to < parts.length ? document.getElementById('i-sw_wd' + parts[to] + k.slice(6)) : null;
+}
+
+function moveTo(/** @type {HTMLElement | null} */ box) {
+  if (!(box instanceof HTMLInputElement)) return;
+  box.focus();
+  box.select();
+}
+
+document.addEventListener('beforeinput', (e) => {
+  const t = dateBox(e.target);
+  if (!t || !e.data || !/\D/.test(e.data)) return;
+  e.preventDefault();
+  if (/^[\s/.-]$/.test(e.data) && t.value !== '') moveTo(neighbour(t, 1));
+});
+
+document.addEventListener('input', (e) => {
+  const t = dateBox(e.target);
+  if (t && /^sw_wd[dm]/.test(t.dataset.k || '') && /^\d{2}$/.test(t.value)) moveTo(neighbour(t, 1));
+});
+
+document.addEventListener('keydown', (e) => {
+  const t = dateBox(e.target);
+  if (t && e.key === 'Backspace' && t.value === '') moveTo(neighbour(t, -1));
 });

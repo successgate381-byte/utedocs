@@ -104,10 +104,16 @@ await test('a typed signature picture that is not a real PNG is never printed', 
 });
 
 for (const [label, url] of [['Lite', '/app/'], ['Pro', '/pro/']]) {
-  await test(label + ': the SWMS date signed fills the date on every named row, and the print note keeps only the review rule', async () => {
+  await test(label + ': each SWMS worker has their own typed date, and the print note keeps only the review rule', async () => {
     const pg = await open(url, 'swms');
-    await pg.fill('#i-sw_workers', 'Sam Lee\nAlex Kim');
-    await pg.fill('#i-sw_signed', '2026-10-20');
+    await pg.fill('#i-sw_wk1', 'Sam Lee');
+    await pg.fill('#i-sw_wdd1', '20');
+    await pg.fill('#i-sw_wdm1', '10');
+    await pg.fill('#i-sw_wdy1', '26');
+    await pg.fill('#i-sw_wk2', 'Alex Kim');
+    await pg.fill('#i-sw_wdd2', '20');
+    await pg.fill('#i-sw_wdm2', '10');
+    await pg.fill('#i-sw_wdy2', '2026');
     await pg.click('#pv');
     await pg.waitForSelector('#paper .ttl');
     const rows = await pg.locator('#paper .swt').last().locator('tbody tr').allTextContents();

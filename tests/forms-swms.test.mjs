@@ -74,7 +74,8 @@ for (const [label, url] of [['Lite', '/app/'], ['Pro', '/pro/']]) {
     await pg.selectOption('#i-sw_rb1', 'Medium');
     await pg.fill('#i-sw_c1', 'Use a trolley');
     await pg.selectOption('#i-sw_ra1', 'Low');
-    await pg.fill('#i-sw_workers', 'Sam Lee\nAlex Kim');
+    await pg.fill('#i-sw_wk1', 'Sam Lee');
+    await pg.fill('#i-sw_wk2', 'Alex Kim');
     await pg.fill('#i-sw_date', '2026-10-20');
     await pg.check('[data-fmk="sw_h3"]');
     await pg.click('#pv');
