@@ -11,6 +11,7 @@ import './forms.js';
 import './lm.js';
 import { archiveQuote } from './recent.js';
 import './forms-swms.js';
+import './notes.js';
 
 initTheme();
 

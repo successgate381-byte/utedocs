@@ -4,6 +4,7 @@ import { esc } from './format.js';
 import { marginForMarkup } from './calc.js';
 import { get, lineCount, tradeName } from './state.js';
 import { firstText, hooks } from './hooks.js';
+import { MAX_DOC, MAX_SAVED, NOTE_MODES, docNoteCount, savedCount } from './notes.js';
 
 /* ---------- small building blocks ---------- */
 
@@ -98,6 +99,25 @@ ${note(PRIVACY + ' Questions? Reply to your receipt email and I will answer with
 ${foot()}</div>`;
 }
 
+/** My Details: words saved once and used on any document. The app writes none of them. */
+function notesLibrary() {
+  let h = sec('SAVED NOTES (OPTIONAL)') + note('Words you use again and again, for example a warranty line or a licence note. You type them, so they are your own words. Each one can print on every document, and you can leave it off any single document. If a note promises a warranty, the ACCC has required wording about the Australian Consumer Law, so check accc.gov.au first.');
+  for (let i = 1; i <= savedCount(); i++) {
+    h += `<div class="nt"><h4>Saved note ${i}</h4>${row('D', 'nl_t' + i, 'Title', 't', { ex: 'Warranty' })}${row('D', 'nl_b' + i, 'Words to print', 'a')}${row('D', 'nl_p' + i, 'Print on documents', 's', { options: ['Yes', 'No'], ex: 'Yes means it prints unless you leave it off one document.' })}</div>`;
+  }
+  return h + `<div class="btns"><button class="b g" id="nl-add"${savedCount() >= MAX_SAVED ? ' disabled' : ''}>+ Add a saved note</button><button class="b g" id="nl-rm"${savedCount() === 0 ? ' disabled' : ''}>Remove the last saved note</button></div>`;
+}
+
+/** The end of a document screen: saved notes can be left off, and up to three notes for this document only. */
+function notesBox(/** @type {string} */ tab) {
+  let h = sec('NOTES (OPTIONAL)') + note('Notes print near the end of the document, above the signature. Saved notes come from My Details.');
+  for (let i = 1; i <= savedCount(); i++) h += row(tab, 'nu' + i, esc(get('D', 'nl_t' + i) || 'Saved note ' + i), 's', { options: NOTE_MODES });
+  for (let i = 1; i <= docNoteCount(tab); i++) {
+    h += `<div class="nt"><h4>Note ${i} for this document</h4>${row(tab, 'nx_t' + i, 'Title', 't')}${row(tab, 'nx_b' + i, 'Words to print', 'a')}${row(tab, 'nx_p' + i, 'Print on PDF', 's', { options: ['Yes', 'No'] })}</div>`;
+  }
+  return h + `<div class="btns"><button class="b g" id="nt-add" data-tab="${tab}"${docNoteCount(tab) >= MAX_DOC ? ' disabled' : ''}>+ Add a note</button><button class="b g" id="nt-rm" data-tab="${tab}"${docNoteCount(tab) === 0 ? ' disabled' : ''}>Remove the last note</button></div>`;
+}
+
 function myDetails() {
   return `<div class="pg"><div class="band"><b>MY BUSINESS DETAILS</b></div><div class="sub">Fill this page in once. It appears on the Quote, Tax Invoice and Invoice tabs by itself.</div>
 ${sec('YOUR BUSINESS')}${row('D', 'name', 'Business name', 't', { ex: 'Smith Electrical', auto: 'organization' })}${row('D', 'abn', 'ABN (11 digits)', 'abn', { ex: '12 345 678 901' })}<div class="warn" id="abn-hint"></div>${row('D', 'lic', 'Licence no. (if you have one)', 't', { ex: 'EC12345' })}${row('D', 'phone', 'Phone', 't', { ex: '0412 345 678', auto: 'tel' })}${row('D', 'email', 'Email', 't', { ex: 'jo@smithelectrical.com.au', auto: 'email' })}
@@ -111,7 +131,7 @@ ${row('D', 'payid', 'PayID (optional)', 't', { ex: '0412 345 678' })}
 ${row('D', 'card', 'Card payment link (optional)', 't', { ex: 'Paste the payment link from your card reader or provider. Never type card numbers here or on an invoice.' })}
 ${row('D', 'terms', 'Payment terms (days)', 'n', { ex: '7' })}
 ${row('D', 'rate', 'GST rate (%)', 'n', { ex: '10% (Australian GST. Only change it if the law changes.)' })}
-${note('The 10% rate is Australian GST. Your Registered for GST answer decides whether the Quote shows GST and which invoice tab to use: Tax Invoice if Yes, Invoice if No.')}${foot()}</div>`;
+${note('The 10% rate is Australian GST. Your Registered for GST answer decides whether the Quote shows GST and which invoice tab to use: Tax Invoice if Yes, Invoice if No.')}${notesLibrary()}${foot()}</div>`;
 }
 
 function documentTab(tab) {
@@ -142,7 +162,7 @@ function documentTab(tab) {
   } else {
     h += '<div class="pay" id="c-terms"></div>';
   }
-  return h + buttons() + foot() + '</div>';
+  return h + notesBox(tab) + buttons() + foot() + '</div>';
 }
 
 function variation() {
@@ -173,6 +193,7 @@ ${sec('CUSTOMER APPROVAL')}
 ${note('I approve this variation, the extra cost and any extra days shown above. The extra work starts after I approve.', 'navy')}
 ${note('The customer fills this in, not you.')}
 ${signature(tab)}
+${notesBox(tab)}
 ${buttons()}
 ${foot()}</div>`;
 }

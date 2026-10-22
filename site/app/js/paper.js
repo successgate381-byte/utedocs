@@ -5,6 +5,7 @@ import { addDays, esc, fmtDate, has, money, num, round2, safeUrl } from './forma
 import { depositFraction, leftToPay, sumLines, variationNewTotal } from './calc.js';
 import { get, gstRate, isLM, lineCount, linesOf, registered } from './state.js';
 import { lmSubtotals, lmTables } from './lm.js';
+import { notesPaper } from './notes.js';
 
 const TITLES = { Quote: 'QUOTE', 'Tax Invoice': 'TAX INVOICE', Invoice: 'INVOICE', Variation: 'VARIATION' };
 
@@ -123,6 +124,7 @@ export function buildPaper(tab) {
   if (!vr && (has(D('bank')) || has(D('acno')))) h += `<div class="sec">PAYMENT DETAILS</div><div class="pd">${payHtml(g('no'))}</div>`;
   if (ti || inv) h += `<p>Payment due within ${esc(D('terms'))} days of the invoice date.</p>`;
   if (q) h += '<p class="sm keep">Variations: any change to the scope of work will be quoted and agreed in writing before the work starts.</p>';
+  h += notesPaper(tab);
   if (q || vr) {
     const f = (k) => (has(g(k)) ? (k === 'ad' ? fmtDate(g(k)) : esc(g(k))) : '&nbsp;');
     const ref = (vr ? 'Variation' : 'Quote') + (has(g('no')) ? ' ' + g('no') : '') + (has(g('cust')) ? ' for ' + g('cust') : '') + ': ' + (vr ? 'this variation ' : 'total ') + money(v.total) + (showGst ? ' (incl GST)' : '');
