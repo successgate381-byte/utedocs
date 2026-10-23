@@ -48,6 +48,17 @@ export function clearTab(tab) {
   save();
 }
 
+/** A copy of everything typed on one document. */
+export function snapshotTab(tab) {
+  return { ...(data.T[tab] || {}) };
+}
+
+/** Put a copy back as the whole document, replacing what is there. */
+export function restoreTab(tab, values) {
+  data.T[tab] = { ...values };
+  save();
+}
+
 export const registered = () => get('D', 'gst') === 'Yes';
 export const gstRate = () => (num(get('D', 'rate')) || 10) / 100;
 

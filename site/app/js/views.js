@@ -5,7 +5,7 @@ import { marginForMarkup } from './calc.js';
 import { get, lineCount, tradeName } from './state.js';
 import { firstText, hooks } from './hooks.js';
 import { MAX_DOC, MAX_SAVED, NOTE_MODES, docNoteCount, savedCount } from './notes.js';
-import { KINDS, saveable } from './recent.js';
+import { KINDS, savedHtml, saveable } from './recent.js';
 
 /* ---------- small building blocks ---------- */
 
@@ -113,7 +113,7 @@ function notesLibrary() {
 function saveBox(/** @type {string} */ tab) {
   if (!saveable(tab)) return '';
   const k = KINDS[tab];
-  return sec('SAVE THIS ' + k.word.toUpperCase()) + note('Keeps ' + k.keeps + ' of your last 3 ' + k.word + 's.' + k.use + ' Price lines are not kept.') + `<div class="btns"><button class="b" id="dsave" data-tab="${tab}">Save this ${k.word}</button></div><div class="note" id="dsave-msg"></div>`;
+  return sec('SAVE THIS ' + k.word.toUpperCase()) + note('Keeps ' + k.keeps + ' of your last 3 ' + k.word + 's.' + k.use + ' Price lines are not kept.') + `<div class="btns"><button class="b" id="dsave" data-tab="${tab}">Save this ${k.word}</button></div><div class="note" id="dsave-msg"></div>` + sec('SAVED ' + k.word.toUpperCase() + 'S') + '<div id="dsaved">' + savedHtml(tab) + '</div>';
 }
 
 /** The end of a document screen: saved notes can be left off, and up to three notes for this document only. */
