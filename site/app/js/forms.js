@@ -172,7 +172,7 @@ ${row(T, 'jc_cdate', 'Customer sign date', 'd', { ex: 'Leave blank to write it b
 ${row(T, 'jc_tname', 'Your name', 't')}
 <div id="fm-sig-t"></div>
 ${row(T, 'jc_tdate', 'Your sign date', 'd')}
-${row(T, 'fm_src', 'Fill from which quote', 's', { options: sourceOptions(), ex: 'The current quote, or one of your last 3.' })}
+${row(T, 'fm_src', 'Fill from which quote', 's', { options: sourceOptions(), ex: 'The current quote, or one of your last 3 saved quotes.' })}
 <div class="note" id="fm-msg"></div>
 ${actions('<button class="b" id="fm-fill">Fill from the quote chosen above</button>')}`;
 }

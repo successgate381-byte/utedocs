@@ -40,9 +40,14 @@
 .dmy span { font-weight: 700; color: var(--head); }
 .nt { margin: 10px 16px; padding: 4px 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--soft); }
 .nt h4 { margin: 8px 16px 0; font-size: 14px; color: var(--head); }
-.sv { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 16px; }
+.sv { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 16px; }
 .sv span { flex: 1; overflow-wrap: anywhere; }
 .sv .b { flex: none; min-width: 80px; }
+.svx { flex: none; }
+.svx[open] { flex-basis: 100%; }
+.svx summary { display: flex; align-items: center; justify-content: center; min-width: 36px; min-height: 36px; border: 1px solid var(--line); border-radius: 6px; background: var(--soft); color: var(--head); font-weight: 700; cursor: pointer; list-style: none; }
+.svx summary::-webkit-details-marker { display: none; }
+.svx[open] .b { margin-top: 8px; }
 #paper .ck { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 16px; margin: 6px 16px; font-size: 12.5px; }
 #paper .ckr { display: flex; gap: 6px; align-items: flex-start; break-inside: avoid; }
 #paper .bx { flex: none; position: relative; width: 13px; height: 13px; margin-top: 1px; border: 1.5px solid #1f2937; border-radius: 2px; }

@@ -163,7 +163,7 @@ ${sec('6. MONITORING AND REVIEW')}
 ${row(T, 'sw_mon', 'Who checks the controls are working, and how often', 'a')}
 ${row(T, 'sw_rev', 'Reviewed by', 't')}
 ${row(T, 'sw_revd', 'Review date and any changes', 't')}
-${row(T, 'fm_src', 'Fill from which quote', 's', { options: sourceOptions(), ex: 'The current quote, or one of your last 3.' })}
+${row(T, 'fm_src', 'Fill from which quote', 's', { options: sourceOptions(), ex: 'The current quote, or one of your last 3 saved quotes.' })}
 <div class="note" id="fm-msg"></div>
 ${actions('<button class="b" id="fm-fill">Fill from the quote chosen above</button>')}`;
 }

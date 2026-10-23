@@ -66,7 +66,7 @@ for (const [label, url] of [['Lite', '/app/'], ['Pro', '/pro/']]) {
     assert.deepEqual(pg.problems, []);
   });
 
-  await test(label + ': a saved note that is on prints under NOTES on all four documents, above the signature; one that is off does not', async () => {
+  await test(label + ': a saved note that is on prints under NOTES on all four documents, in the right place on each; one that is off does not', async () => {
     const pg = await open(url, { ...BASE, ...SAVED });
     for (const name of DOCS) {
       const txt = await paperText(pg, name);
@@ -118,6 +118,25 @@ for (const [label, url] of [['Lite', '/app/'], ['Pro', '/pro/']]) {
     await tab(pg, 'Quote');
     assert.equal(await pg.locator('[data-k^="nx_t"]').count(), 0, 'Clear this document removes the notes');
     assert.deepEqual(pg.problems, []);
+  });
+
+  await test(label + ': the guides say where notes land, never promise a signature on an invoice, and the Save guide is true', async () => {
+    const pg = await open(url);
+    const guide = async (name) => {
+      await tab(pg, name);
+      return pg.getByText(/^Notes print /).first().innerText();
+    };
+    assert.match(await guide('Quote'), /above the acceptance and signature block/);
+    assert.match(await guide('Variation'), /above the approval and signature block/);
+    for (const name of ['Tax Invoice', 'Invoice']) {
+      const g = await guide(name);
+      assert.match(g, /after the payment details/);
+      assert.doesNotMatch(g, /signature/i, name + ' has no signature block');
+    }
+    await tab(pg, 'Quote');
+    const screen = await pg.locator('body').innerText();
+    assert.ok(screen.includes('price lines and notes included'));
+    assert.ok(!screen.includes('Price lines are not kept'));
   });
 
   await test(label + ': with no notes the printed page has no NOTES heading', async () => {

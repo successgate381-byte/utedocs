@@ -1,5 +1,5 @@
 // @ts-check
-// The last 3 saved quotes, and the last 3 saved variations. The Save button keeps a small copy here, newest first, and the oldest drops off.
+// The last 3 saved quotes, and the last 3 saved variations. The Save button keeps a whole copy here, newest first, and the oldest drops off.
 import { setText } from './dom.js';
 import { esc, fmtDate, has } from './format.js';
 import { get, put, restoreTab, snapshotTab } from './state.js';
@@ -10,7 +10,7 @@ const MAX = 3;
 /** @typedef {{ [k: string]: any, _all?: Record<string, string> }} Copy */
 /**
  * The documents that have a Save button: what each keeps, and what counts as worth keeping.
- * @type {Record<string, { slot: string, word: string, fields: string[], worth: string[], keeps: string, use: string, first: string }>}
+ * @type {Record<string, { slot: string, word: string, fields: string[], worth: string[], use: string, first: string }>}
  */
 export const KINDS = {
   Quote: {
@@ -18,7 +18,6 @@ export const KINDS = {
     word: 'quote',
     fields: ['no', 'date', 'cust', 'phone', 'addr', 'site', 'scope'],
     worth: ['cust', 'no', 'scope', 'd1'],
-    keeps: 'the name, number, date, phone, address, site and scope',
     use: ' The Job Completion Certificate and the SWMS can fill from them.',
     first: 'a customer name, a quote number or a job description',
   },
@@ -27,7 +26,6 @@ export const KINDS = {
     word: 'variation',
     fields: ['no', 'date', 'qno', 'days', 'cust', 'site', 'why', 'whyo', 'desc', 'pay'],
     worth: ['cust', 'no', 'desc', 'd1'],
-    keeps: 'the number, date, job number, extra days, client, site, reason, description and how it gets paid',
     use: ' Nothing fills from saved variations yet.',
     first: 'a client name, a variation number or a description of the change',
   },
@@ -81,13 +79,18 @@ export function clearText(/** @type {string} */ tab) {
     : 'Clear this ' + w + '? Your business details stay.';
 }
 
+/** Write the kept copies of one document, newest first, into their slots. */
+function keep(/** @type {string} */ tab, /** @type {Copy[]} */ list) {
+  for (let i = 1; i <= MAX; i++) put(RECENT, KINDS[tab].slot + i, list[i - 1] ? JSON.stringify(list[i - 1]) : '');
+}
+
 /** Keep a copy. An empty document is not kept, and the same one again replaces its old copy. */
 export function archive(/** @type {string} */ tab) {
   /** @type {Copy} */
   const q = { ...now(tab), _all: snapshotTab(tab) };
   if (!worthKeeping(tab)) return false;
   const list = [q, ...recents(tab).filter((r) => !(r.no === q.no && r.cust === q.cust))].slice(0, MAX);
-  for (let i = 1; i <= MAX; i++) put(RECENT, KINDS[tab].slot + i, list[i - 1] ? JSON.stringify(list[i - 1]) : '');
+  keep(tab, list);
   return true;
 }
 
@@ -109,7 +112,7 @@ export function pickSource(/** @type {string} */ choice) {
 
 /** The saved copies as rows with an Open button. Older copies hold only details, so they cannot be reopened. */
 export function savedHtml(/** @type {string} */ tab) {
-  const rows = recents(tab).map((q, i) => `<div class="sv"><span>${esc(label(q, i + 1))}${q._all ? '' : ' (details only)'}</span><button class="b g" id="dopen${i + 1}" data-tab="${tab}" data-n="${i + 1}"${q._all ? '' : ' disabled'}>Open</button></div>`);
+  const rows = recents(tab).map((q, i) => `<div class="sv"><span>${esc(label(q, i + 1))}${q._all ? '' : ' (details only)'}</span><button class="b g" id="dopen${i + 1}" data-tab="${tab}" data-n="${i + 1}"${q._all ? '' : ' disabled'}>Open</button><details class="svx"><summary aria-label="More for saved ${i + 1}">⋯</summary><button class="b g" id="drm${i + 1}" data-tab="${tab}" data-n="${i + 1}">Remove</button></details></div>`);
   return rows.length ? rows.join('') : '<div class="note">Nothing saved yet.</div>';
 }
 
@@ -136,4 +139,15 @@ document.addEventListener('click', (e) => {
   const nav = document.querySelector(`#nav [data-t="${tab}"]`);
   if (nav instanceof HTMLElement) nav.click();
   setText('dsave-msg', 'Opened the saved ' + w + ' for ' + (copy.cust || 'no name') + '.');
+});
+
+document.addEventListener('click', (e) => {
+  const b = e.target instanceof Element ? e.target.closest('button') : null;
+  if (!b || !b.id.startsWith('drm')) return;
+  const tab = b.dataset.tab || '';
+  if (!saveable(tab) || !confirm('Remove this saved ' + KINDS[tab].word + '? It cannot be brought back.')) return;
+  keep(tab, recents(tab).filter((_, i) => i !== Number(b.dataset.n) - 1));
+  const box = document.getElementById('dsaved');
+  if (box) box.innerHTML = savedHtml(tab);
+  setText('dsave-msg', 'Removed. You have ' + recents(tab).length + ' of ' + MAX + ' saved ' + KINDS[tab].word + 's.');
 });

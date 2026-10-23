@@ -102,7 +102,7 @@ ${foot()}</div>`;
 
 /** My Details: words saved once and used on any document. The app writes none of them. */
 function notesLibrary() {
-  let h = sec('SAVED NOTES (OPTIONAL)') + note('Words you use again and again, for example a warranty line or a licence note. You type them, so they are your own words. Each one can print on every document, and you can leave it off any single document. If a note promises a warranty, the ACCC has required wording about the Australian Consumer Law, so check accc.gov.au first.');
+  let h = sec('SAVED NOTES (OPTIONAL)') + note('Words you use again and again, for example a warranty line or a licence note. You type them, so they are your own words. Each one can print on your quotes, tax invoices, invoices and variations, and you can leave it off any single document. If a note promises a warranty, the ACCC has required wording about the Australian Consumer Law, so check accc.gov.au first.');
   for (let i = 1; i <= savedCount(); i++) {
     h += `<div class="nt"><h4>Saved note ${i}</h4>${row('D', 'nl_t' + i, 'Title', 't', { ex: 'Warranty' })}${row('D', 'nl_b' + i, 'Words to print', 'a')}${row('D', 'nl_p' + i, 'Print on documents', 's', { options: ['Yes', 'No'], ex: 'Yes means it prints unless you leave it off one document.' })}</div>`;
   }
@@ -113,12 +113,20 @@ function notesLibrary() {
 function saveBox(/** @type {string} */ tab) {
   if (!saveable(tab)) return '';
   const k = KINDS[tab];
-  return sec('SAVE THIS ' + k.word.toUpperCase()) + note('Keeps ' + k.keeps + ' of your last 3 ' + k.word + 's.' + k.use + ' Price lines are not kept.') + `<div class="btns"><button class="b" id="dsave" data-tab="${tab}">Save this ${k.word}</button></div><div class="note" id="dsave-msg"></div>` + sec('SAVED ' + k.word.toUpperCase() + 'S') + '<div id="dsaved">' + savedHtml(tab) + '</div>';
+  return sec('SAVE THIS ' + k.word.toUpperCase()) + note('Keeps this whole ' + k.word + ', price lines and notes included, as one of your last 3 saved ' + k.word + 's. Open one below to bring it back.' + k.use) + `<div class="btns"><button class="b" id="dsave" data-tab="${tab}">Save this ${k.word}</button></div><div class="note" id="dsave-msg"></div>` + sec('SAVED ' + k.word.toUpperCase() + 'S') + '<div id="dsaved">' + savedHtml(tab) + '</div>';
 }
+
+/** Where the notes land on each finished document, so the guide never promises a signature block that is not there. */
+const NOTES_WHERE = /** @type {Record<string, string>} */ ({
+  Quote: 'on the finished quote, above the acceptance and signature block',
+  Variation: 'on the finished variation, above the approval and signature block',
+  'Tax Invoice': 'at the end of the finished tax invoice, after the payment details',
+  Invoice: 'at the end of the finished invoice, after the payment details',
+});
 
 /** The end of a document screen: saved notes can be left off, and up to three notes for this document only. */
 function notesBox(/** @type {string} */ tab) {
-  let h = sec('NOTES (OPTIONAL)') + note('Notes print near the end of the document, above the signature. Saved notes come from My Details.');
+  let h = sec('NOTES (OPTIONAL)') + note('Notes print ' + (NOTES_WHERE[tab] || 'near the end of the finished document') + '. Saved notes come from My Details.');
   for (let i = 1; i <= savedCount(); i++) h += row(tab, 'nu' + i, esc(get('D', 'nl_t' + i) || 'Saved note ' + i), 's', { options: NOTE_MODES });
   for (let i = 1; i <= docNoteCount(tab); i++) {
     h += `<div class="nt"><h4>Note ${i} for this document</h4>${row(tab, 'nx_t' + i, 'Title', 't')}${row(tab, 'nx_b' + i, 'Words to print', 'a')}${row(tab, 'nx_p' + i, 'Print on PDF', 's', { options: ['Yes', 'No'] })}</div>`;
