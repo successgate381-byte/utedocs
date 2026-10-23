@@ -5,6 +5,7 @@ import { marginForMarkup } from './calc.js';
 import { get, lineCount, tradeName } from './state.js';
 import { firstText, hooks } from './hooks.js';
 import { MAX_DOC, MAX_SAVED, NOTE_MODES, docNoteCount, savedCount } from './notes.js';
+import { KINDS, saveable } from './recent.js';
 
 /* ---------- small building blocks ---------- */
 
@@ -108,6 +109,13 @@ function notesLibrary() {
   return h + `<div class="btns"><button class="b g" id="nl-add"${savedCount() >= MAX_SAVED ? ' disabled' : ''}>+ Add a saved note</button><button class="b g" id="nl-rm"${savedCount() === 0 ? ' disabled' : ''}>Remove the last saved note</button></div>`;
 }
 
+/** The Save button of a document that keeps saved copies (the Quote and the Variation). */
+function saveBox(/** @type {string} */ tab) {
+  if (!saveable(tab)) return '';
+  const k = KINDS[tab];
+  return sec('SAVE THIS ' + k.word.toUpperCase()) + note('Keeps ' + k.keeps + ' of your last 3 ' + k.word + 's.' + k.use + ' Price lines are not kept.') + `<div class="btns"><button class="b" id="dsave" data-tab="${tab}">Save this ${k.word}</button></div><div class="note" id="dsave-msg"></div>`;
+}
+
 /** The end of a document screen: saved notes can be left off, and up to three notes for this document only. */
 function notesBox(/** @type {string} */ tab) {
   let h = sec('NOTES (OPTIONAL)') + note('Notes print near the end of the document, above the signature. Saved notes come from My Details.');
@@ -162,7 +170,7 @@ function documentTab(tab) {
   } else {
     h += '<div class="pay" id="c-terms"></div>';
   }
-  return h + notesBox(tab) + buttons() + foot() + '</div>';
+  return h + notesBox(tab) + saveBox(tab) + buttons() + foot() + '</div>';
 }
 
 function variation() {
@@ -194,6 +202,7 @@ ${note('I approve this variation, the extra cost and any extra days shown above.
 ${note('The customer fills this in, not you.')}
 ${signature(tab)}
 ${notesBox(tab)}
+${saveBox(tab)}
 ${buttons()}
 ${foot()}</div>`;
 }

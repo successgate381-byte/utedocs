@@ -9,7 +9,7 @@ import { renderTab } from './views.js';
 import { initTheme } from './theme.js';
 import './forms.js';
 import './lm.js';
-import { archiveQuote } from './recent.js';
+import { clearText, saveable } from './recent.js';
 import './forms-swms.js';
 import './notes.js';
 
@@ -132,8 +132,7 @@ function onClick(/** @type {Event} */ ev) {
     window.print();
     document.title = old;
   }
-  if (t.id === 'clr' && confirm(tab === 'Quote' ? 'Clear this quote? A copy stays in your last 3 quotes. Your business details stay.' : 'Clear this document? Your business details stay.')) {
-    if (tab === 'Quote') archiveQuote();
+  if (t.id === 'clr' && confirm(saveable(tab) ? clearText(tab) : 'Clear this document? Your business details stay.')) {
     clearTab(tab);
     go(tab);
   }

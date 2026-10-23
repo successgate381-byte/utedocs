@@ -43,6 +43,7 @@ const newQuote = async (pg, no, cust, site, scope) => {
 };
 const clearQuote = async (pg) => {
   await pg.click('nav button[data-t="Quote"]');
+  await pg.click('#dsave');
   await pg.click('#clr');
   await pg.waitForFunction(() => document.querySelector('[data-k="cust"]').value === '');
 };
@@ -52,7 +53,7 @@ const kept = (pg) => pg.evaluate(() => {
 });
 
 for (const [label, url] of [['Lite', '/app/'], ['Pro', '/pro/']]) {
-  await test(label + ': clearing keeps the last 3 quotes, newest first, and the oldest drops off', async () => {
+  await test(label + ': saving keeps the last 3 quotes, newest first, and the oldest drops off', async () => {
     const pg = await open(url);
     for (const [no, cust] of [['Q-1', 'Ann'], ['Q-2', 'Ben'], ['Q-3', 'Cat'], ['Q-4', 'Dan']]) {
       await newQuote(pg, no, cust, no + ' Street', 'Scope of ' + no);
