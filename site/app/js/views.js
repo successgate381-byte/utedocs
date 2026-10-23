@@ -102,7 +102,7 @@ ${foot()}</div>`;
 
 /** My Details: words saved once and used on any document. The app writes none of them. */
 function notesLibrary() {
-  let h = sec('SAVED NOTES (OPTIONAL)') + note('Words you use again and again, for example a warranty line or a licence note. You type them, so they are your own words. Each one can print on your quotes, tax invoices, invoices and variations, and you can leave it off any single document. If a note promises a warranty, the ACCC has required wording about the Australian Consumer Law, so check accc.gov.au first.');
+  let h = sec('SAVED NOTES (OPTIONAL)') + note('Words you use again and again, for example a warranty line or a licence note. You type them, so they are your own words. Each one can print on your quotes, tax invoices, invoices, variations and job completion certificates, and you can leave it off any single document. If a note promises a warranty, the ACCC has required wording about the Australian Consumer Law, so check accc.gov.au first.');
   for (let i = 1; i <= savedCount(); i++) {
     h += `<div class="nt"><h4>Saved note ${i}</h4>${row('D', 'nl_t' + i, 'Title', 't', { ex: 'Warranty' })}${row('D', 'nl_b' + i, 'Words to print', 'a')}${row('D', 'nl_p' + i, 'Print on documents', 's', { options: ['Yes', 'No'], ex: 'Yes means it prints unless you leave it off one document.' })}</div>`;
   }
@@ -122,16 +122,18 @@ const NOTES_WHERE = /** @type {Record<string, string>} */ ({
   Variation: 'on the finished variation, above the approval and signature block',
   'Tax Invoice': 'at the end of the finished tax invoice, after the payment details',
   Invoice: 'at the end of the finished invoice, after the payment details',
+  jc_: 'on the finished certificate, above the customer acknowledgement and the signatures',
 });
 
 /** The end of a document screen: saved notes can be left off, and up to three notes for this document only. */
-function notesBox(/** @type {string} */ tab) {
-  let h = sec('NOTES (OPTIONAL)') + note('Notes print ' + (NOTES_WHERE[tab] || 'near the end of the finished document') + '. Saved notes come from My Details.');
-  for (let i = 1; i <= savedCount(); i++) h += row(tab, 'nu' + i, esc(get('D', 'nl_t' + i) || 'Saved note ' + i), 's', { options: NOTE_MODES });
-  for (let i = 1; i <= docNoteCount(tab); i++) {
-    h += `<div class="nt"><h4>Note ${i} for this document</h4>${row(tab, 'nx_t' + i, 'Title', 't')}${row(tab, 'nx_b' + i, 'Words to print', 'a')}${row(tab, 'nx_p' + i, 'Print on PDF', 's', { options: ['Yes', 'No'] })}</div>`;
+export function notesBox(/** @type {string} */ tab, /** @type {string} */ pre = '') {
+  const n = docNoteCount(tab, pre);
+  let h = sec('NOTES (OPTIONAL)') + note('Notes print ' + (NOTES_WHERE[pre || tab] || 'near the end of the finished document') + '. Saved notes come from My Details.');
+  for (let i = 1; i <= savedCount(); i++) h += row(tab, pre + 'nu' + i, esc(get('D', 'nl_t' + i) || 'Saved note ' + i), 's', { options: NOTE_MODES });
+  for (let i = 1; i <= n; i++) {
+    h += `<div class="nt"><h4>Note ${i} for this document</h4>${row(tab, pre + 'nx_t' + i, 'Title', 't')}${row(tab, pre + 'nx_b' + i, 'Words to print', 'a')}${row(tab, pre + 'nx_p' + i, 'Print on PDF', 's', { options: ['Yes', 'No'] })}</div>`;
   }
-  return h + `<div class="btns"><button class="b g" id="nt-add" data-tab="${tab}"${docNoteCount(tab) >= MAX_DOC ? ' disabled' : ''}>+ Add a note</button><button class="b g" id="nt-rm" data-tab="${tab}"${docNoteCount(tab) === 0 ? ' disabled' : ''}>Remove the last note</button></div>`;
+  return h + `<div class="btns"><button class="b g" id="nt-add" data-tab="${tab}" data-pre="${pre}"${n >= MAX_DOC ? ' disabled' : ''}>+ Add a note</button><button class="b g" id="nt-rm" data-tab="${tab}" data-pre="${pre}"${n === 0 ? ' disabled' : ''}>Remove the last note</button></div>`;
 }
 
 function myDetails() {

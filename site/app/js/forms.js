@@ -6,8 +6,9 @@ import { addDays, esc, fmtDate, has, money, num } from './format.js';
 import { hooks } from './hooks.js';
 import { letterhead, paperFoot } from './paper.js';
 import { get, gstRate, lineCount, linesOf, put, registered } from './state.js';
+import { noteKeys, notesPaper } from './notes.js';
 import { pickSource, sourceOptions } from './recent.js';
-import { band, foot, note, row, sec } from './views.js';
+import { band, foot, note, notesBox, row, sec } from './views.js';
 
 export const FORMS_TAB = 'Forms';
 const T = FORMS_TAB;
@@ -148,7 +149,7 @@ FORMS.push({ id: 'pay', label: 'Get Paid Faster', screen: payScreen, live: payLi
 
 /* ---------------- Job Completion Certificate ---------------- */
 
-const CERT_KEYS = ['jc_cust', 'jc_addr', 'jc_no', 'jc_start', 'jc_done', 'jc_work', 'jc_out', 'jc_fixby', 'jc_warr', 'jc_cname', 'jc_cdate', 'jc_tname', 'jc_tdate', 'jc_csig', 'jc_cstr', 'jc_tsig', 'jc_tstr'];
+const CERT_KEYS = ['jc_cust', 'jc_addr', 'jc_no', 'jc_start', 'jc_done', 'jc_work', 'jc_out', 'jc_fixby', 'jc_warr', 'jc_cname', 'jc_cdate', 'jc_tname', 'jc_tdate', 'jc_csig', 'jc_cstr', 'jc_tsig', 'jc_tstr', ...noteKeys('jc_')];
 
 function certScreen() {
   return `${note('A sign-off sheet for the customer to sign when the job is finished. It is not a statutory certificate of compliance.', 'navy')}
@@ -165,6 +166,7 @@ ${row(T, 'jc_out', 'List them', 'a', { ex: 'Leave blank if there is nothing outs
 ${row(T, 'jc_fixby', 'To be fixed by', 'd')}
 ${sec('WORKMANSHIP / WARRANTY NOTE')}
 ${row(T, 'jc_warr', 'Note', 'a')}
+${notesBox(T, 'jc_')}
 ${sec('SIGN-OFF')}
 ${row(T, 'jc_cname', 'Customer name (for the signature line)', 't', { ex: 'Blank uses the customer above.' })}
 <div id="fm-sig-c"></div>
@@ -190,6 +192,7 @@ function certPaper() {
   h += '<div class="sec">WORK COMPLETED</div>' + box(g('jc_work'));
   h += '<div class="sec">OUTSTANDING ITEMS OR DEFECTS TO FIX</div>' + box(g('jc_out')) + kv('To be fixed by', fmtDate(g('jc_fixby')));
   h += '<div class="sec">WORKMANSHIP / WARRANTY NOTE</div>' + box(g('jc_warr'));
+  h += notesPaper(T, 'jc_');
   h += '<div class="sec">CUSTOMER ACKNOWLEDGEMENT</div><p class="keep">I confirm the work described above has been completed, except for any items listed as outstanding.</p>';
   h += sign('Customer', g('jc_cname') || g('jc_cust'), fmtDate(g('jc_cdate')), g('jc_csig'));
   h += '<div class="sec">TRADIE</div>' + sign('Tradie', g('jc_tname'), fmtDate(g('jc_tdate')), g('jc_tsig'));
